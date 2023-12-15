@@ -14,7 +14,8 @@ https://github.com/TimothyHelton/pyproject_generator
 - `docs`: Folder used by sphinx for auto-documentation
 - `pyproject_microservices`: Project main directory - additional services are added here
   - `apigateway`: API Gateway service for managing and routing requests
-  - `base`: Base service sample but could be your model or main python service
+  - `base`: Base scripts that can be used by all microservices but could also be
+  your model or main python service
     - `configs`: Base configuration files
     - `test`: Base unit tests
   - `data management`: Data Management service for data related tasks (ETL)
@@ -28,7 +29,7 @@ https://github.com/TimothyHelton/pyproject_generator
   - `streamlit`: Streamlit service with sample pages (missing test atm)
 - `scripts`: Folder with setup related scripts
 
-Notes: future updates could include 
+Notes: future updates will include Endpoints as I continue to update other microservices
 
 ## Setting Up New Project
 1. From current project root directory, run:

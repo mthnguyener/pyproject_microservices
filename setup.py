@@ -138,9 +138,7 @@ setup(
         'test':
         combine_dependencies('test'),
     },
-    package_dir={
-        'pyproject_microservices': 'pyproject_microservices'
-    },
+    package_dir={'pyproject_microservices': 'pyproject_microservices'},
     include_package_data=True,
     entry_points={
         'console_scripts': [

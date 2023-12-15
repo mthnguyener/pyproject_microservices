@@ -305,11 +305,16 @@ tensorboard-stop-server: docker-up
 		/bin/bash -c \
 			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
 
+test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
 test: docker-up format-style
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		sh -c "pip install -r requirements-dev.txt \
-		&& py.test $(PROJECT) \
-		&& yes | pip uninstall -r requirements-dev.txt" | tee -a logs/tests/log.txt
+		sh -c 'echo "Installing packages for testing....." \
+		&& pip install -r requirements-dev.txt > logs/tests/$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+		sh -c 'py.test $(PROJECT) | tee -a logs/tests/$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+		sh -c 'echo "Removing packages that was used for testing....." \
+		&& yes | pip uninstall -r requirements-dev.txt >> logs/tests/$(timestamp)_log.txt'
 
 test-coverage: test
 	@${BROWSER} htmlcov/index.html &

@@ -44,8 +44,8 @@ class ComposeConfiguration:
                      self._config)
 
         self._container_prefix = (
-            self._config['services']['base']['container_name'].rsplit(
-                '_', 1)[0])
+            self._config['services']['base']['container_name'].rsplit('_',
+                                                                      1)[0])
         self._package = self._container_prefix.rsplit('}_', 1)[1]
         self._network = f'{self._package}-network'
         self._volume_db = f'{self._package}-db'

@@ -14,8 +14,7 @@ try:
     _dist = get_distribution('pyproject_microservices')
     dist_loc = path.normcase(_dist.location)
     here = path.normcase(__file__)
-    if not here.startswith(
-            path.join(dist_loc, 'pyproject_microservices')):
+    if not here.startswith(path.join(dist_loc, 'pyproject_microservices')):
         raise DistributionNotFound
 except DistributionNotFound:
     __version__ = 'Please install this project with setup.py'
