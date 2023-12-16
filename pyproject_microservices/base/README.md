@@ -1,3 +1,2 @@
 #  Base Directory
-  - Base scripts that serves as helpers for other microservices
-  - Can also be used as a main or general model service
+  - Base scripts that contains shared utilities and helper functions that can be used across multiple microservices.

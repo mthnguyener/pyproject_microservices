@@ -1,9 +1,11 @@
 #  PyProject Microservices Template
 PyProject Microservices Template is a Python based microservices project template. 
-The template with sample endpoints and a generic microservices architecture.
+The template will have sample endpoints and a generic microservices architecture.
 
-This template enhances and builds on top of Timothy Helton's Pyproject Generator: 
+This template builds on top of Timothy Helton's Pyproject Generator: 
 https://github.com/TimothyHelton/pyproject_generator
+
+<img src="./assets/microservices_diagram.png" alt="Microservice Diagram" width="768" height="auto"/>
 
 ## PyProject Template Structure
 - `docker`: Docker directory
