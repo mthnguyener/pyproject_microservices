@@ -1,4 +1,4 @@
-PROJECT=pyproject_microservices
+PROJECT=service_apigateway
 
 $(shell scripts/create_usr_vars.sh)
 ifeq (, $(wildcard docker/.env))
@@ -28,7 +28,7 @@ TENSORBOARD_DIR:="ai_logs"
 TEX_WORKING_DIR=${SRC_DIR}/${TEX_DIR}
 USER:=$(shell echo $${USER%%@*})
 USER_ID:=$(shell id -u $(USER))
-# VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
+VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
 
 .PHONY: docs format-style upgrade-packages
 
@@ -40,13 +40,8 @@ cpp-build:
 		&& cmake --build . \
 		&& cp lib/*.so* ../lib
 
-create-project:
-	@read -p "Enter the old project name: " old_name; \
-	read -p "Enter the new project name: " new_name; \
-	./scripts/update_project_name.sh $$old_name $$new_name
-
 deploy: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pip3 wheel --wheel-dir=wheels .[all]
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) pip3 wheel --wheel-dir=wheels .[all]
 	@git tag -a v$(VERSION) -m "Version $(VERSION)"
 	@echo
 	@echo
@@ -64,22 +59,21 @@ docker-rebuild: setup.py
 
 docker-up:
 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml up -d
-	@$(DOCKER_COMPOSE_CMD) -f service_apigateway/docker/docker-compose.yaml up -d
 
 docker-update-config: docker-up docker-update-compose-file docker-rebuild
 	@echo "Docker environment updated successfully"
 
 docker-update-compose-file:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python scripts/docker_config.py
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) scripts/docker_config.py
 
 docs: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c "cd docs && make html"
 	@${BROWSER} http://localhost:$(PORT_NGINX) 2>&1 &
 
 docs-first-run-delete: docker-up
 	find docs -maxdepth 1 -type f -delete
-	$(DOCKER_CMD) container exec $(PROJECT)_python \
+	$(DOCKER_CMD) container exec $(PROJECT) \
 		/bin/bash -c \
 			"cd docs \
 			 && sphinx-quickstart -q \
@@ -105,8 +99,8 @@ else
 			 && sed -i \"/# sys.path.insert(0, os.path.abspath('.'))/d\" \
 				conf.py \
 			 && sed -i -e \"/import sys/a \
-				from pyproject_microservices import __version__ \
-				\n\nsys.path.insert(0, os.path.abspath('../pyproject_microservices'))\" \
+				from service_apigateway import __version__ \
+				\n\nsys.path.insert(0, os.path.abspath('../service_apigateway'))\" \
 				conf.py \
 			 && sed -i -e \"s/version = '0.1.0'/version = __version__/g\" \
 				conf.py \
@@ -124,7 +118,7 @@ endif
 docs-init:
 	@rm -rf docs/*
 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml  up -d
-	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(PROJECT) $(PROJECT)_python \
+	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(PROJECT) $(PROJECT) \
 		/bin/bash -c \
 			"cd /usr/src/$(PROJECT)/docs \
 			 && sphinx-quickstart -q \
@@ -145,7 +139,7 @@ docs-view: docker-up
 	@${BROWSER} http://localhost:$(PORT_NGINX) &
 
 format-style: docker-up
-	$(DOCKER_CMD) container exec $(USER_NAME)_service_modelserving yapf -i -p -r --style "pep8" /usr/src/service_modelserving
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) yapf -i -p -r --style "pep8" ${SRC_DIR}
 
 getting-started: secret-templates docs-init
 	@mkdir -p cache \
@@ -158,7 +152,7 @@ getting-started: secret-templates docs-init
 		&& printf "%s\n" \
 
 ipython: docker-up
-	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX)_python ipython
+	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX) ipython
 
 latexmk: docker-up
 	$(DOCKER_CMD) container exec -w $(TEX_WORKING_DIR) $(CONTAINER_PREFIX)_latex \
@@ -177,26 +171,21 @@ mlflow: docker-up mlflow-server
 			"####################################################################"
 
 mlflow-clean: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python mlflow gc
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) mlflow gc
 
 mlflow-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"mlflow server \
 				--host 0.0.0.0 \
 				&"
 
 mlflow-stop-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pkill -f gunicorn
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) pkill -f gunicorn
 
 mongo-create-user:
 	@sleep 2
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_mongo /docker-entrypoint-initdb.d/create_user.sh
-
-new-network:
-	@read -p "Enter the new network name: " NEW_NETWORK; \
-	NEW_NETWORK=$${NEW_NETWORK:-$(PROJECT)-network}; \
-	./scripts/update_network_name.sh $$NEW_NETWORK
 
 new-project:
 	@read -p "Enter the new project name: " NEW_PROJECT; \
@@ -210,7 +199,7 @@ notebook: docker-up notebook-server
 		"####################################################################" \
 		"Use this link on the host to access the Jupyter server." \
 		""
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"jupyter lab list 2>&1 \
 			 | grep -o 'http.*$(PORT_JUPYTER)\S*' \
@@ -224,11 +213,11 @@ notebook: docker-up notebook-server
 		"####################################################################"
 
 notebook-delete-checkpoints: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		rm -rf `find -L -type d -name .ipynb_checkpoints`
 
 notebook-server: notebook-stop-server
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"jupyter lab \
 				--allow-root \
@@ -238,7 +227,7 @@ notebook-server: notebook-stop-server
 				&"
 
 notebook-stop-server:
-	@-$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@-$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c "jupyter lab stop $(PORT_JUPYTER)"
 
 package-dependencies: docker-up
@@ -248,12 +237,12 @@ package-dependencies: docker-up
 		"#" \
 		> requirements.txt
 ifeq ("${PKG_MANAGER}", "conda")
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"conda list --export >> requirements.txt \
 			 && sed -i -e '/^$(PROJECT)/ s/./# &/' requirements.txt"
 else ifeq ("${PKG_MANAGER}", "pip")
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"pip freeze -l --exclude $(PROJECT) >> requirements.txt"
 endif
@@ -262,7 +251,7 @@ pgadmin: docker-up
 	${BROWSER} http://localhost:$(PORT_DATABASE_ADMINISTRATION) &
 
 profile: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"python -m cProfile -o $(PROFILE_PATH) $(PROFILE_PY)"
 psql: docker-up
@@ -277,8 +266,7 @@ secret-templates:
 		&& printf '%s' "admin" > 'db_init_username.txt' \
 		&& printf '%s' "password" > 'db_password.txt' \
 		&& printf '%s' "username" > 'db_username.txt' \
-		&& printf '%s' "$(PROJECT)" > 'package.txt' \
-		&& printf '%s' "service_modelserving" > 'service_modelserving.txt'
+		&& printf '%s' "$(PROJECT)" > 'package.txt'
 
 snakeviz: docker-up profile snakeviz-server
 	@sleep 0.5
@@ -287,7 +275,7 @@ snakeviz: docker-up profile snakeviz-server
 snakeviz-server: docker-up
 	@$(DOCKER_CMD) container exec \
 		-w /usr/src/$(PROJECT)/profiles \
-		$(CONTAINER_PREFIX)_python \
+		$(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"snakeviz $(PROFILE_PROF) \
 				--hostname 0.0.0.0 \
@@ -307,33 +295,30 @@ tensorboard: docker-up tensorboard-server
 			"####################################################################"
 
 tensorboard-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"tensorboard --load_fast=false --logdir $(TENSORBOARD_DIR) &"
 
 tensorboard-stop-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
 
 test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
 test: docker-up format-style
-	@cd service_modelserving && make test
-	@cd service_apigateway && make test
-
-test-getting-started:
-	@cd service_apigateway && make getting-started
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
+		sh -c 'py.test $(PROJECT) | tee -a logs/tests/$(timestamp)_log.txt'
 
 test-coverage: test
 	@${BROWSER} htmlcov/index.html &
 
 update-nvidia-base-images: docker-up
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		./scripts/update_nvidia_tags.py \
 
 upgrade-packages: docker-up
 ifeq ("${PKG_MANAGER}", "pip")
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"pip3 install -U pip \
 			 && pip3 freeze | \
@@ -343,7 +328,7 @@ ifeq ("${PKG_MANAGER}", "pip")
 			 && pip3 freeze > requirements.txt \
 			 && sed -i -e '/^-e/d' requirements.txt"
 else ifeq ("${PKG_MANAGER}", "conda")
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
 		/bin/bash -c \
 			"conda update conda \
 			 && conda update --all \

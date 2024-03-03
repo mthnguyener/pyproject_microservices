@@ -11,7 +11,7 @@ from typing import Optional
 
 import yaml
 
-from pyproject_starter.pkg_globals import PACKAGE_ROOT
+from service_apigateway.pkg_globals import PACKAGE_ROOT
 
 logger = logging.getLogger('package')
 
@@ -25,7 +25,7 @@ class ComposeService(Enum):
     NGINX = f'{PROJECT_NAME}_nginx'
     POSTGRES = f'{PROJECT_NAME}_postgres'
     PGADMIN = f'{PROJECT_NAME}_pgadmin'
-    PYTHON = f'{PROJECT_NAME}_python'
+    PYTHON = f'{PROJECT_NAME}'
     STREAMLIT = f'{PROJECT_NAME}_streamlit'
 
 
@@ -47,7 +47,7 @@ class ComposeConfiguration:
                      self._config)
 
         self._container_prefix = (
-            self._config['services'][f'{PROJECT_NAME}_python']['container_name'].rsplit(
+            self._config['services'][f'{PROJECT_NAME}']['container_name'].rsplit(
                 '_', 1)[0])
         self._package = self._container_prefix.rsplit('}_', 1)[1]
         self._network = f'{self._package}-network'
@@ -99,7 +99,7 @@ class ComposeConfiguration:
             **self._config.get('secrets', {}),
             **secrets,
         }
-        self._config['services'][f'{PROJECT_NAME}_python']['secrets'] = [
+        self._config['services'][f'{PROJECT_NAME}']['secrets'] = [
             'db-database',
             'db-password',
             'db-username',
@@ -114,7 +114,7 @@ class ComposeConfiguration:
             'name': f'{self._container_prefix}-db'
         }
 
-    def _add_pyproject_starter_latex(self):
+    def _add_service_apigateway_latex(self):
         """Add LaTeX service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_latex'] = {
             'container_name': f'{self._container_prefix}_latex',
@@ -129,7 +129,7 @@ class ComposeConfiguration:
             'working_dir': self._working_dir,
         }
 
-    def _add_pyproject_starter_mongo(self):
+    def _add_service_apigateway_mongo(self):
         """Add MongoDB service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_mongo'] = {
             'container_name':
@@ -170,7 +170,7 @@ class ComposeConfiguration:
         self._mongo_create_user_js()
         self._mongo_create_user_sh()
 
-    def _mongo_pyproject_starter_create_user_js(self):
+    def _mongo_service_apigateway_create_user_js(self):
         """Write JS script to create MongoDB user."""
         text = [
             'const fs = require("fs")',
@@ -223,7 +223,7 @@ class ComposeConfiguration:
         with open(self._mongo_init_dir / 'create_user.sh', 'w') as f:
             f.writelines('\n'.join(text))
 
-    def _add_pyproject_starter_nginx(self):
+    def _add_service_apigateway_nginx(self):
         """Add NGINX service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_nginx'] = {
             'container_name':
@@ -247,7 +247,7 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_pyproject_starter_postgres(self):
+    def _add_service_apigateway_postgres(self):
         """Add PostgreSQL service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_postgres'] = {
             'container_name':
@@ -281,7 +281,7 @@ class ComposeConfiguration:
         self._update_depends_on(ComposeService.POSTGRES)
         self._add_secrets()
 
-    def _add_pyproject_starter_pgadmin(self):
+    def _add_service_apigateway_pgadmin(self):
         """Add PGAdmin service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_pgadmin'] = {
             'container_name':
@@ -311,7 +311,7 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_pyproject_starter_streamlit(self):
+    def _add_service_apigateway_streamlit(self):
         """Add Streamlit service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_streamlit'] = {
             'build': {
@@ -333,19 +333,19 @@ class ComposeConfiguration:
             'always',
             'volumes': [
                 f'../applications/streamlit:'
-                f'/usr/src/pyproject_starter/applications/streamlit',
+                f'/usr/src/service_apigateway/applications/streamlit',
             ],
         }
 
     def _update_depends_on(self, service_name: ComposeService):
         """Update the Python service `depends_on` tag."""
-        py_tag = self._config['services'][f'{PROJECT_NAME}_python']
+        py_tag = self._config['services'][f'{PROJECT_NAME}']
         py_tag['depends_on'] = (py_tag.get('depends_on', []) +
                                 [service_name.value])
 
     def add_gpu(self):
         """Add GPU configuration to Python container."""
-        py_service = self._config['services'][f'{PROJECT_NAME}_python']
+        py_service = self._config['services'][f'{PROJECT_NAME}']
         py_service['build']['shm_size'] = '1g'
         py_service['cap_add'] = ['SYS_PTRACE']
         py_service['deploy'] = {
