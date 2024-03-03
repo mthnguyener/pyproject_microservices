@@ -6,7 +6,9 @@
 from pathlib import Path
 
 PACKAGE_ROOT = Path(__file__).parents[2]
-with open((PACKAGE_ROOT / 'docker' / 'pytorch.Dockerfile'), 'r') as f:
+with open(
+    (PACKAGE_ROOT / 'service_modelserving/docker' / 'modelserving.Dockerfile'),
+        'r') as f:
     line = f.readline()
 NVIDIA_NGC_BASE_IMAGE = line \
     .strip('FROM ') \

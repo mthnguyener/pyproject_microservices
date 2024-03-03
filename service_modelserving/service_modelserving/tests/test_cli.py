@@ -5,7 +5,7 @@
 """
 from click.testing import CliRunner
 
-from pyproject_microservices.base import cli
+from service_modelserving.service_modelserving import cli
 
 
 def test_count():

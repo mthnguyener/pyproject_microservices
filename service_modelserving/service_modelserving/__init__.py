@@ -6,15 +6,15 @@ from os import path
 
 # from . import cli
 # from . import db
-from .base import exceptions, pkg_globals, utils
+from . import pkg_globals, utils, exceptions
 
 __version__ = '0.1.0'
 
 try:
-    _dist = get_distribution('pyproject_microservices')
+    _dist = get_distribution('service_modelserving')
     dist_loc = path.normcase(_dist.location)
     here = path.normcase(__file__)
-    if not here.startswith(path.join(dist_loc, 'pyproject_microservices')):
+    if not here.startswith(path.join(dist_loc, 'service_modelserving')):
         raise DistributionNotFound
 except DistributionNotFound:
     __version__ = 'Please install this project with setup.py'

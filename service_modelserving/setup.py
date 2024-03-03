@@ -65,7 +65,7 @@ def combine_dependencies(extras: Union[str, Iterable[str]]) -> List[str]:
     return list(deps)
 
 
-with open('pyproject_microservices/__init__.py', 'r') as fd:
+with open('service_modelserving/__init__.py', 'r') as fd:
     version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', fd.read(),
                         re.MULTILINE).group(1)
 
@@ -74,7 +74,7 @@ with open(here / 'README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='pyproject_microservices',
+    name='service_modelserving',
     version=version,
     description='Modules related to EnterDescriptionHere',
     author='Minh Nguyen',
@@ -138,11 +138,11 @@ setup(
         'test':
         combine_dependencies('test'),
     },
-    package_dir={'pyproject_microservices': 'pyproject_microservices'},
+    package_dir={'service_modelserving': 'service_modelserving'},
     include_package_data=True,
     entry_points={
         'console_scripts': [
-            'count=pyproject_microservices.cli:count',
+            'count=service_modelserving.cli:count',
         ]
     })
 

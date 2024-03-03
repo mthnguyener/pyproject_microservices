@@ -11,7 +11,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import select
 
-from pyproject_microservices.base.utils import docker_secret
+from service_modelserving.service_modelserving.utils import docker_secret
 
 logger = logging.getLogger('package')
 

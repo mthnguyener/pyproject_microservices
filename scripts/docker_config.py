@@ -10,7 +10,7 @@ from typing import Optional
 
 import yaml
 
-from pyproject_microservices.base.pkg_globals import PACKAGE_ROOT
+from service_modelserving.service_modelserving import PACKAGE_ROOT
 
 logger = logging.getLogger('package')
 
@@ -23,7 +23,7 @@ class ComposeService(Enum):
     POSTGRES = 'postgres'
     PGADMIN = 'pgadmin'
     PYTHON = 'base'
-    STREAMLIT = 'streamlit'
+    STREAMLIT = 'service_frontend'
 
 
 class ComposeConfiguration:
@@ -310,10 +310,10 @@ class ComposeConfiguration:
 
     def _add_streamlit(self):
         """Add Streamlit service to configuration."""
-        self._config['services']['streamlit'] = {
+        self._config['services']['service_frontend'] = {
             'build': {
                 'context': '..',
-                'dockerfile': 'docker/streamlit.Dockerfile',
+                'dockerfile': 'docker/frontend.Dockerfile',
             },
             'container_name':
             f'{self._container_prefix}_streamlit',
@@ -329,9 +329,9 @@ class ComposeConfiguration:
             'restart':
             'always',
             'volumes': [
-                f'../{self._package}/streamlit:'
+                f'../{self._package}/service_frontend:'
                 f'/usr/src/pyproject_microservices/'
-                f'pyproject_microservices/streamlit',
+                f'pyproject_microservices/service_frontend',
             ],
         }
 

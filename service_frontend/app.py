@@ -5,9 +5,9 @@
 """
 import streamlit as st
 
-from pyproject_microservices.streamlit.subpages.page_1 \
+from subpages.page_1 \
     import page_1
-from pyproject_microservices.streamlit.subpages.page_2 \
+from subpages.page_2 \
     import page_2
 
 

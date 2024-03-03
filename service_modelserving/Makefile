@@ -1,6 +1,6 @@
-PROJECT=pyproject_microservices
+PROJECT=service_modelserving
 
-$(shell scripts/create_usr_vars.sh)
+# $(shell scripts/create_usr_vars.sh)
 ifeq (, $(wildcard docker/.env))
         $(shell ln -s ../usr_vars docker/.env)
 endif
@@ -18,7 +18,7 @@ endif
 CONTAINER_PREFIX:=$(COMPOSE_PROJECT_NAME)_$(PROJECT)
 DOCKER_CMD=docker
 DOCKER_COMPOSE_CMD=docker compose
-DOCKER_IMAGE=$(shell head -n 1 docker/python.Dockerfile | cut -d ' ' -f 2)
+DOCKER_IMAGE=$(shell head -n 1 ../docker/python.Dockerfile | cut -d ' ' -f 2)
 PKG_MANAGER=pip
 PROFILE_PY:=""
 PROFILE_PROF:=$(notdir $(PROFILE_PY:.py=.prof))
@@ -28,7 +28,7 @@ TENSORBOARD_DIR:="ai_logs"
 TEX_WORKING_DIR=${SRC_DIR}/${TEX_DIR}
 USER:=$(shell echo $${USER%%@*})
 USER_ID:=$(shell id -u $(USER))
-# VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
+VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
 
 .PHONY: docs format-style upgrade-packages
 
@@ -43,7 +43,7 @@ cpp-build:
 create-project:
 	@read -p "Enter the old project name: " old_name; \
 	read -p "Enter the new project name: " new_name; \
-	./scripts/update_project_name.sh $$old_name $$new_name
+	../scripts/update_project_name.sh $$old_name $$new_name
 
 deploy: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pip3 wheel --wheel-dir=wheels .[all]
@@ -69,7 +69,7 @@ docker-update-config: docker-up docker-update-compose-file docker-rebuild
 	@echo "Docker environment updated successfully"
 
 docker-update-compose-file:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python scripts/docker_config.py
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python ../scripts/docker_config.py
 
 docs: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
@@ -104,8 +104,8 @@ else
 			 && sed -i \"/# sys.path.insert(0, os.path.abspath('.'))/d\" \
 				conf.py \
 			 && sed -i -e \"/import sys/a \
-				from pyproject_microservices import __version__ \
-				\n\nsys.path.insert(0, os.path.abspath('../pyproject_microservices'))\" \
+				from service_modelserving import __version__ \
+				\n\nsys.path.insert(0, os.path.abspath('../service_modelserving'))\" \
 				conf.py \
 			 && sed -i -e \"s/version = '0.1.0'/version = __version__/g\" \
 				conf.py \
@@ -143,8 +143,8 @@ docs-init:
 docs-view: docker-up
 	@${BROWSER} http://localhost:$(PORT_NGINX) &
 
-format-style: docker-up
-	$(DOCKER_CMD) container exec $(COMPOSE_PROJECT_NAME)_service_modelserving yapf -i -p -r --style "pep8" /usr/src/service_modelserving
+format-style:
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) yapf -i -p -r --style "pep8" ${SRC_DIR}
 
 getting-started: secret-templates docs-init
 	@mkdir -p cache \
@@ -267,8 +267,7 @@ secret-templates:
 		&& printf '%s' "admin" > 'db_init_username.txt' \
 		&& printf '%s' "password" > 'db_password.txt' \
 		&& printf '%s' "username" > 'db_username.txt' \
-		&& printf '%s' "$(PROJECT)" > 'package.txt' \
-		&& printf '%s' "service_modelserving" > 'service_modelserving.txt'
+		&& printf '%s' "$(PROJECT)" > 'package.txt'
 
 snakeviz: docker-up profile snakeviz-server
 	@sleep 0.5
@@ -307,15 +306,19 @@ tensorboard-stop-server: docker-up
 			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
 
 test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
-test: docker-up format-style
-	@cd service_modelserving && make test
+test: format-style
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
+		sh -c 'echo "Installing packages for testing....." \
+		&& pip install -r requirements-dev.txt > logs/tests/$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX) \
+		sh -c 'py.test $(PROJECT) | tee -a logs/tests/$(timestamp)_log.txt'
 
 test-coverage: test
 	@${BROWSER} htmlcov/index.html &
 
 update-nvidia-base-images: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		./scripts/update_nvidia_tags.py \
+		../scripts/update_nvidia_tags.py \
 
 upgrade-packages: docker-up
 ifeq ("${PKG_MANAGER}", "pip")

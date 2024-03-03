@@ -9,7 +9,7 @@ import time
 import numpy as np
 import pytest
 
-from pyproject_microservices.base.pkg_globals import TIME_FORMAT
+from service_modelserving.service_modelserving.pkg_globals import TIME_FORMAT
 
 TEST_ARRAY = np.linspace(0, 255, 9, dtype=np.uint8).reshape(3, 3)
 TEST_LABEL = 'test_string'

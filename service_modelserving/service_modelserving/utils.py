@@ -17,8 +17,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import ray
 
-from pyproject_microservices.base.exceptions import InputError
-from pyproject_microservices.base.pkg_globals import FONT_SIZE, TIME_FORMAT
+from service_modelserving.service_modelserving.exceptions import InputError
+from service_modelserving.service_modelserving.pkg_globals import FONT_SIZE, \
+    TIME_FORMAT
 
 
 def docker_secret(secret_name: str) -> Optional[str]:

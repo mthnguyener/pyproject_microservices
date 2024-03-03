@@ -10,7 +10,7 @@ RUN cd /opt \
 	&& apt install -y \
 		apt-utils \
 		fonts-humor-sans \
-	&& cd /usr/src/pyproject_microservices \
+	&& cd /usr/src/service_modelserving \
 	&& pip install --upgrade pip \
 	&& pip install -e .[all] \
 	&& rm -rf /tmp/* \

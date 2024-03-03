@@ -4,9 +4,11 @@ networks:
 secrets:
   package:
     file: secrets/package.txt
+  service_modelserving:
+    file: secrets/service_modelserving.txt
 services:
   nginx:
-    container_name: ${COMPOSE_PROJECT_NAME:-default}_pyproject_microservices_nginx
+    container_name: ${COMPOSE_PROJECT_NAME:-default}_service_nginx
     env_file: .env
     environment:
       PORT_NGINX: ${PORT_NGINX}
@@ -18,14 +20,14 @@ services:
     restart: always
     volumes:
     - ../docs/_build/html:/usr/share/nginx/html:ro
-  python:
+  modelserving:
     build:
       context: ..
-      dockerfile: docker/pytorch.Dockerfile
+      dockerfile: docker/modelserving.Dockerfile
       shm_size: 1g
     cap_add:
     - SYS_PTRACE
-    container_name: ${COMPOSE_PROJECT_NAME:-default}_pyproject_microservices_python
+    container_name: ${COMPOSE_PROJECT_NAME:-default}_service_modelserving
     deploy:
       resources:
         reservations:
@@ -42,7 +44,7 @@ services:
     - PORT_PROFILE=${PORT_PROFILE}
     - PORT_RAY_DASHBOARD=${PORT_RAY_DASHBOARD}
     - PORT_RAY_SERVER=${PORT_RAY_SERVER}
-    image: pyproject_microservices_python
+    image: service_modelserving
     ipc: host
     networks:
     - pyproject_microservices-network
@@ -57,29 +59,33 @@ services:
     restart: always
     secrets:
     - package
+    - service_modelserving
     shm_size: 24g
     tty: true
     ulimits:
       memlock: -1
     volumes:
-    - ..:/usr/src/pyproject_microservices
-    - ${DATA_DIR}:/usr/src/pyproject_microservices/data
-    - pyproject_microservices-secret:/usr/src/pyproject_microservices/docker/secrets
-  streamlit:
+    - ${DATA_DIR}:/usr/src/service_modelserving/data
+    - ../service_modelserving:/usr/src/service_modelserving
+    - ../usr_vars:/usr/src/service_modelserving/usr_vars
+    - ./.env:/usr/src/service_modelserving/docker/.env
+    - ./modelserving.Dockerfile:/usr/src/service_modelserving/docker/modelserving.Dockerfile
+    - service_modelserving-secret:/usr/src/service_modelserving/docker/secrets
+  frontend:
     build:
       context: ..
-      dockerfile: docker/streamlit.Dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME:-default}_pyproject_microservices_streamlit
+      dockerfile: docker/frontend.Dockerfile
+    container_name: ${COMPOSE_PROJECT_NAME:-default}_service_frontend
     env_file: .env
     environment:
       PORT_STREAMLIT: ${PORT_STREAMLIT}
-    image: pyproject_microservices_streamlit
+    image: service_frontend
     networks:
     - pyproject_microservices-network
     ports:
     - $PORT_STREAMLIT:8501
     restart: always
     volumes:
-    - ../pyproject_microservices/streamlit:/usr/src/pyproject_microservices/pyproject_microservices/streamlit
+    - ../service_frontend:/usr/src/service_frontend
 volumes:
-  pyproject_microservices-secret: null
+  service_modelserving-secret: null

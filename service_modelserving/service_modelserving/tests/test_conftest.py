@@ -7,7 +7,7 @@ import datetime
 import time
 
 from .conftest import TEST_DATETIME, TEST_STRFTIME
-from pyproject_microservices.base.pkg_globals import TIME_FORMAT
+from service_modelserving.service_modelserving.pkg_globals import TIME_FORMAT
 
 
 # Test patch_datetime()

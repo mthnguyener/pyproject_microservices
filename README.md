@@ -14,22 +14,19 @@ https://github.com/TimothyHelton/pyproject_generator
   - `docker-compose.yaml`: Yaml file used by Docker Compose to define the services, 
   networks, and volumes for a multi-container application
 - `docs`: Folder used by sphinx for auto-documentation
-- `pyproject_microservices`: Project main directory - additional services are added here
-  - `apigateway`: API Gateway service for managing and routing requests
-  - `base`: Base scripts that can be used by all microservices but could also be
-  your model or main python service
+- `scripts`: Folder with setup related scripts
+- `service_apigateway`: API Gateway service for managing and routing requests
+- `service_data_management`: Data Management service for data related tasks (ETL)
+- `service_frontend`: Streamlit service with sample pages (missing test atm)
+- `service_modelinference`: Model Inference service processing incoming data and 
+returning inference results to the requesting applications.
+- `service_modelserving`: Model Serving service providing an interface for external systems 
+to interact with the models.
     - `configs`: Base configuration files
     - `test`: Base unit tests
-  - `data management`: Data Management service for data related tasks (ETL)
-  - `modelinference`: Model Inference service processing incoming data and 
-  returning inference results to the requesting applications.
-  - `modelserving`: Model Serving service providing an interface for external systems 
-  to interact with the models.
-  - `modeltraining`: Model Training service training machine learning models
-  - `monitoring`: Monitoring and Logging service overseeing the health, performance, 
-  and operational aspects of the entire microservices architecture
-  - `streamlit`: Streamlit service with sample pages (missing test atm)
-- `scripts`: Folder with setup related scripts
+- `service_modeltraining`: Model Training service training machine learning models
+- `service_monitoring`: Monitoring and Logging service overseeing the health, performance, 
+and operational aspects of the entire microservices architecture
 
 Notes: future updates will include Endpoints as I continue to update other microservices
 

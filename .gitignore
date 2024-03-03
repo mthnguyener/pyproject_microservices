@@ -1,14 +1,14 @@
 # Cached files
-cache/
+*cache/
 
 # C++ files
-build/
-/cmake-build-debug/
-cpp_tests/lib/
+*build/
+*/cmake-build-debug/
+*cpp_tests/lib/
 
 # Compiled source
 *.com
-dist/
+*dist/
 *.egg-info/
 *.class
 *.dll
@@ -19,34 +19,36 @@ dist/
 *.so*
 
 # Docker files
-docker/.env
-docker/secrets/
+*.env
+*secrets/
+*/docker/
 
 # Environments
-venv/*
+*venv/*
 
 # Ipython files
-.ipynb_checkpoints
+*.ipynb_checkpoints
 
 # Logs and databases
 *.log
-logs/
+*logs/
 *make.bat
-runs/
+*runs/
 *.sql
 *.sqlite
 
 # MLFlow experiments
-ai_logs/
-mlruns/
+*ai_logs/
+*mlruns/
+
 # OS generated files
-.DS_Store
-.DS_store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+*.DS_Store
+*.DS_store?
+*._*
+*.Spotlight-V100
+*.Trashes
+*ehthumbs.db
+*Thumbs.db
 
 # Packages
 *.7z
@@ -60,32 +62,32 @@ Thumbs.db
 
 # Profile files
 *.coverage
-htmlcov/
+*htmlcov/
 *.profile
 
 # Project files
 *wheels
 
 # PyCharm files
-.idea/*
-pyproject_microservices/.idea/*
+*.idea/vcs.xml
+*.idea/*
 
 # pytest files
-.cache/*
-.pytest_cache
-pytest
+*.cache/*
+*.pytest_cache
+*pytest
 
 # Raw data
-data/*
+*data/*
 
 # Sphinx files
-docs/_build/
-docs/_static/
-docs/_templates/
-docs/Makefile
+*docs/_build/
+*docs/_static/
+*docs/_templates/
+*docs/Makefile
 
 # Submodules
-submodules/*
+*submodules/*
 
 # User specific files
-usr_vars
+*usr_vars

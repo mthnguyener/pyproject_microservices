@@ -11,13 +11,13 @@ import numpy as np
 import pytest
 
 from .conftest import TEST_STRFTIME
-from pyproject_microservices.base import exceptions, utils
+from .. import utils, exceptions
 
 LOGGER = logging.getLogger(__name__)
 
 # Test docker_secret()
 docker_secret = {
-    'package': ('package', 'pyproject_microservices'),
+    'service_modelserving': ('service_modelserving', 'service_modelserving'),
 }
 
 

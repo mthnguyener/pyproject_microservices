@@ -4,7 +4,7 @@
 
 """
 
-# DATABASE = 'pyproject_microservices'
+# DATABASE = 'service_modelserving'
 # HOST = 'pyproject_microservices_postgres'
 # TABLE_NAME = '<enter_table_name_in_pyproject_microservices_db>'
 
