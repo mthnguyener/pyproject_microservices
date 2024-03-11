@@ -7,5 +7,5 @@ import streamlit as st
 
 
 def page_2():
-    st.subheader("Page 2")
-    st.write("This is content for Page 2.")
+    st.subheader("Model 2")
+    st.write("This is content for Model 2.")

@@ -1,6 +1,6 @@
 networks:
   pyproject_microservices-network:
-    name: ${COMPOSE_PROJECT_NAME:-default}-${NETWORK_NAME}
+    name: ${USER_NAME:-default}-${NETWORK_NAME}
 secrets:
   package:
     file: secrets/package.txt
@@ -8,10 +8,10 @@ secrets:
     file: secrets/service_modelserving.txt
 services:
   pyproject_microservices-nginx:
-    container_name: ${USER_NAME:-default}_service_nginx
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_nginx
     env_file: .env
     environment:
-      PORT_NGINX: ${PORT_NGINX}
+    - PORT_NGINX=${PORT_NGINX}
     image: nginx:alpine
     networks:
     - ${NETWORK_NAME}
@@ -20,6 +20,47 @@ services:
     restart: always
     volumes:
     - ../docs/_build/html:/usr/share/nginx/html:ro
+  pyproject_microservices-apigateway:
+    build:
+      context: ..
+      dockerfile: docker/apigateway.Dockerfile
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_apigateway
+    env_file: .env
+    environment:
+    - PORT_APIGATEWAY=${PORT_APIGATEWAY}
+    - PORT_FRONTEND=${PORT_FRONTEND}
+    - PORT_MODELSERVING=${PORT_MODELSERVING}
+    image: ${PROJECT_NAME}_apigateway
+    networks:
+    - ${NETWORK_NAME}
+    ports:
+    - ${PORT_APIGATEWAY}:${PORT_APIGATEWAY}
+    volumes:
+    - ../service_apigateway:/usr/src/service_apigateway
+    - ../utils:/usr/src/service_apigateway/utils
+    - ../usr_vars:/usr/src/service_apigateway/usr_vars
+    - ./.env:/usr/src/service_apigateway/docker/.env
+  pyproject_microservices-frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_frontend
+    env_file: .env
+    environment:
+    - PORT_APIGATEWAY=${PORT_APIGATEWAY}
+    - PORT_FRONTEND=${PORT_FRONTEND}
+    - PORT_MODELSERVING=${PORT_MODELSERVING}
+    image: ${PROJECT_NAME}_frontend
+    networks:
+    - ${NETWORK_NAME}
+    ports:
+    - ${PORT_FRONTEND}:8501
+    restart: always
+    volumes:
+    - ../service_frontend:/usr/src/service_frontend
+    - ../utils:/usr/src/service_frontend/utils
+    - ../usr_vars:/usr/src/service_frontend/usr_vars
+    - ./.env:/usr/src/service_frontend/docker/.env
   pyproject_microservices-modelserving:
     build:
       context: ..
@@ -27,7 +68,7 @@ services:
       shm_size: 1g
     cap_add:
     - SYS_PTRACE
-    container_name: ${USER_NAME:-default}_service_modelserving
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_modelserving
     deploy:
       resources:
         reservations:
@@ -36,26 +77,19 @@ services:
             - gpu
     env_file: .env
     environment:
-    - ENVIRONMENT=${ENVIRONMENT}
-    - PORT_DASH=${PORT_DASH}
-    - PORT_GOOGLE=${PORT_GOOGLE}
+    - PORT_APIGATEWAY=${PORT_APIGATEWAY}
+    - PORT_FRONTEND=${PORT_FRONTEND}
     - PORT_JUPYTER=${PORT_JUPYTER}
-    - PORT_MLFLOW=${PORT_MLFLOW}
+    - PORT_MODELSERVING=${PORT_MODELSERVING}
     - PORT_PROFILE=${PORT_PROFILE}
-    - PORT_RAY_DASHBOARD=${PORT_RAY_DASHBOARD}
-    - PORT_RAY_SERVER=${PORT_RAY_SERVER}
-    image: service_modelserving
+    image: ${PROJECT_NAME}_modelserving
     ipc: host
     networks:
     - ${NETWORK_NAME}
     ports:
-    - ${PORT_DASH}:${PORT_DASH}
-    - ${PORT_GOOGLE}:${PORT_GOOGLE}
     - ${PORT_JUPYTER}:${PORT_JUPYTER}
-    - ${PORT_MLFLOW}:5000
+    - ${PORT_MODELSERVING}:${PORT_MODELSERVING}
     - ${PORT_PROFILE}:${PORT_PROFILE}
-    - ${PORT_RAY_DASHBOARD}:${PORT_RAY_DASHBOARD}
-    - ${PORT_RAY_SERVER}:${PORT_RAY_SERVER}
     restart: always
     secrets:
     - package
@@ -67,25 +101,9 @@ services:
     volumes:
     - ${DATA_DIR}:/usr/src/service_modelserving/data
     - ../service_modelserving:/usr/src/service_modelserving
+    - ../utils:/usr/src/service_modelserving/utils
     - ../usr_vars:/usr/src/service_modelserving/usr_vars
     - ./.env:/usr/src/service_modelserving/docker/.env
-    - ./modelserving.Dockerfile:/usr/src/service_modelserving/docker/modelserving.Dockerfile
     - service_modelserving-secret:/usr/src/service_modelserving/docker/secrets
-  pyproject_microservices-frontend:
-    build:
-      context: ..
-      dockerfile: docker/frontend.Dockerfile
-    container_name: ${USER_NAME:-default}_service_frontend
-    env_file: .env
-    environment:
-      PORT_STREAMLIT: ${PORT_STREAMLIT}
-    image: service_frontend
-    networks:
-    - pyproject_microservices-network
-    ports:
-    - $PORT_STREAMLIT:8501
-    restart: always
-    volumes:
-    - ../service_frontend:/usr/src/service_frontend
 volumes:
   service_modelserving-secret: null

@@ -18,7 +18,7 @@ endif
 CONTAINER_PREFIX:=$(USER_NAME)_$(PROJECT)
 DOCKER_CMD=docker
 DOCKER_COMPOSE_CMD=docker compose
-DOCKER_IMAGE=$(shell head -n 1 docker/python.Dockerfile | cut -d ' ' -f 2)
+# DOCKER_IMAGE=$(shell head -n 1 docker/python.Dockerfile | cut -d ' ' -f 2)
 PKG_MANAGER=pip
 PROFILE_PY:=""
 PROFILE_PROF:=$(notdir $(PROFILE_PY:.py=.prof))
@@ -40,11 +40,6 @@ cpp-build:
 		&& cmake --build . \
 		&& cp lib/*.so* ../lib
 
-create-project:
-	@read -p "Enter the old project name: " old_name; \
-	read -p "Enter the new project name: " new_name; \
-	./scripts/update_project_name.sh $$old_name $$new_name
-
 deploy: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pip3 wheel --wheel-dir=wheels .[all]
 	@git tag -a v$(VERSION) -m "Version $(VERSION)"
@@ -64,7 +59,6 @@ docker-rebuild: setup.py
 
 docker-up:
 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml up -d
-	@$(DOCKER_COMPOSE_CMD) -f service_apigateway/docker/docker-compose.yaml up -d
 
 docker-update-config: docker-up docker-update-compose-file docker-rebuild
 	@echo "Docker environment updated successfully"
@@ -244,7 +238,7 @@ notebook-stop-server:
 package-dependencies: docker-up
 	@printf "%s\n" \
 		"# ${PROJECT} Version: $(VERSION)" \
-		"# From NVIDIA NGC CONTAINER: $(DOCKER_IMAGE)" \
+# 		"# From NVIDIA NGC CONTAINER: $(DOCKER_IMAGE)" \
 		"#" \
 		> requirements.txt
 ifeq ("${PKG_MANAGER}", "conda")
@@ -318,8 +312,14 @@ tensorboard-stop-server: docker-up
 
 test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
 test: docker-up format-style
-	@cd service_modelserving && make test
-	@cd service_apigateway && make test
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+		sh -c 'echo "Installing packages for testing....." \
+		&& pip install -r requirements-dev.txt > logs/tests/$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+		sh -c 'py.test $(PROJECT) | tee -a logs/tests/$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+		sh -c 'echo "Removing packages that was used for testing....." \
+		&& yes | pip uninstall -r requirements-dev.txt >> logs/tests/$(timestamp)_log.txt'
 
 test-getting-started:
 	@cd service_apigateway && make getting-started
