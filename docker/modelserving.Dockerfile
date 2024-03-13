@@ -21,4 +21,4 @@ RUN pip install --upgrade pip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt clean -y
 
-CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port $PORT_MODELSERVING"]
+CMD ["sh", "-c", "uvicorn app:model_serving_app --host 0.0.0.0 --port $PORT_MODELSERVING"]

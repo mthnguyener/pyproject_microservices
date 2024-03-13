@@ -10,4 +10,4 @@ RUN pip3 install --upgrade pip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt clean -y
 
-CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port $PORT_APIGATEWAY"]
+CMD ["sh", "-c", "uvicorn app:api_gateway_app --host 0.0.0.0 --port $PORT_APIGATEWAY"]

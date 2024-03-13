@@ -37,6 +37,7 @@ services:
     - ${PORT_APIGATEWAY}:${PORT_APIGATEWAY}
     volumes:
     - ../service_apigateway:/usr/src/service_apigateway
+    - ../logs:/usr/src/service_apigateway/logs
     - ../utils:/usr/src/service_apigateway/utils
     - ../usr_vars:/usr/src/service_apigateway/usr_vars
     - ./.env:/usr/src/service_apigateway/docker/.env
@@ -58,6 +59,7 @@ services:
     restart: always
     volumes:
     - ../service_frontend:/usr/src/service_frontend
+    - ../logs:/usr/src/service_frontend/logs
     - ../utils:/usr/src/service_frontend/utils
     - ../usr_vars:/usr/src/service_frontend/usr_vars
     - ./.env:/usr/src/service_frontend/docker/.env
@@ -99,8 +101,9 @@ services:
     ulimits:
       memlock: -1
     volumes:
-    - ${DATA_DIR}:/usr/src/service_modelserving/data
     - ../service_modelserving:/usr/src/service_modelserving
+    - ${DATA_DIR}:/usr/src/service_modelserving/data
+    - ../logs:/usr/src/service_modelserving/logs
     - ../utils:/usr/src/service_modelserving/utils
     - ../usr_vars:/usr/src/service_modelserving/usr_vars
     - ./.env:/usr/src/service_modelserving/docker/.env

@@ -3,8 +3,6 @@
 """ Frontend App Module
 
 """
-import os
-
 import streamlit as st
 
 from handler import fetch_model_results, trigger_action
@@ -20,7 +18,7 @@ def home_page():
 
 
 def main():
-    st.title("My Streamlit App")
+    st.title("My Frontend App")
 
     # Navigation
     page = st.sidebar.selectbox("Menu", ["Home", "Model 1", "Model 2"])

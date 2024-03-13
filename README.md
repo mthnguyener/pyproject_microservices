@@ -1,5 +1,5 @@
-#  PyProject Microservices Template
-PyProject Microservices Template is a Python based microservices project template. 
+#  PyProject Microservices
+PyProject Microservices is a Python based microservices project template. 
 The template will have sample endpoints and a generic microservices architecture.
 
 This template builds on top of Timothy Helton's Pyproject Generator: 
@@ -7,7 +7,7 @@ https://github.com/TimothyHelton/pyproject_generator
 
 <img src="./assets/microservices_diagram.png" alt="Microservice Diagram" width="768" height="auto"/>
 
-## PyProject Template Structure
+## PyProject Microservices Structure
 - `docker`: Docker directory
   - `mongo_init`: Folder with mongo init related files
   - `Dockerfile`: Dockerfiles for building Docker container images
@@ -27,13 +27,13 @@ to interact with the models.
 - `service_modeltraining`: Model Training service training machine learning models
 - `service_monitoring`: Monitoring and Logging service overseeing the health, performance, 
 and operational aspects of the entire microservices architecture
+- `utils`: Folder containing util functions and variables
 
 Notes: future updates will include Endpoints as I continue to update other microservices
 
 ## Setting Up New Project
 1. From current project root directory, run:
-   - `make create-project`
-     - `Enter the old project name: pyproject_microservices`
+   - `make new-project`
      - `Enter the new project name: new_project`
 1. Current project directories and files are created in the new project directory
     - `new_project/`

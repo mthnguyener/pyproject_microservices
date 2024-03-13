@@ -5,8 +5,10 @@
 """
 import httpx
 
-from utils.variables import PORT_APIGATEWAY, PORT_MODELSERVING, PROJECT_NAME, \
-    URL_APIGATEWAY, USERNAME
+from utils.helpers import CustomLogger
+from utils.variables import URL_APIGATEWAY
+
+custom_logger = CustomLogger(service_name='MODELSERVING')
 
 
 async def process_action(action: dict):
@@ -18,10 +20,14 @@ async def process_action(action: dict):
             response = await client.post(url, json=output)
             if response.status_code == 200:
                 response_json = response.json()
+                custom_logger.log("INFO",
+                                  f"Successfully processed action: "
+                                  f"{response_json}")
             else:
                 response_json = "Failed to send response back to API Gateway"
     except httpx.HTTPError as e:
         response_json = f"HTTP Error: {e}"
+        custom_logger.log("ERROR", response_json)
     return {"message": f"Model Response: {response_json}"}
 
 
