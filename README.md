@@ -1,33 +1,31 @@
-#  PyProject Microservices
-PyProject Microservices is a Python based microservices project template. 
+#  pyproject_microservices
+pyproject_microservices is a Python based microservices project template. 
 The template will have sample endpoints and a generic microservices architecture.
 
-This template builds on top of Timothy Helton's Pyproject Generator: 
-https://github.com/TimothyHelton/pyproject_generator
+This template builds on top of PyProject Starter: 
+https://github.com/mthnguyener/pyproject_starter
 
 <img src="./assets/microservices_diagram.png" alt="Microservice Diagram" width="768" height="auto"/>
 
-## PyProject Microservices Structure
+## pyproject_microservices Structure
 - `docker`: Docker directory
-  - `mongo_init`: Folder with mongo init related files
   - `Dockerfile`: Dockerfiles for building Docker container images
   - `docker-compose.yaml`: Yaml file used by Docker Compose to define the services, 
   networks, and volumes for a multi-container application
 - `docs`: Folder used by sphinx for auto-documentation
+- `pyproject_microservices`: Contains services and utility directories
+  - `api_gateway (COMPLETED)`: API Gateway service for managing and routing requests
+  - `data_management`: Data Management service for data related tasks (ETL)
+  - `front_end (COMPLETED)`: Streamlit service with sample pages (missing test atm)
+  - `model_inference`: Model Inference service processing incoming data and 
+  returning inference results to the requesting applications.
+  - `model_serving (COMPLETED)`: Model Serving service providing an interface for external systems 
+  to interact with the models.
+  - `model_training`: Model Training service training machine learning models
+  - `monitoring`: Monitoring and Logging service overseeing the health, performance, 
+  and operational aspects of the entire microservices architecture
+  - `utils`: Folder containing util functions and variables
 - `scripts`: Folder with setup related scripts
-- `service_apigateway`: API Gateway service for managing and routing requests
-- `service_data_management`: Data Management service for data related tasks (ETL)
-- `service_frontend`: Streamlit service with sample pages (missing test atm)
-- `service_modelinference`: Model Inference service processing incoming data and 
-returning inference results to the requesting applications.
-- `service_modelserving`: Model Serving service providing an interface for external systems 
-to interact with the models.
-    - `configs`: Base configuration files
-    - `test`: Base unit tests
-- `service_modeltraining`: Model Training service training machine learning models
-- `service_monitoring`: Monitoring and Logging service overseeing the health, performance, 
-and operational aspects of the entire microservices architecture
-- `utils`: Folder containing util functions and variables
 
 Notes: future updates will include Endpoints as I continue to update other microservices
 

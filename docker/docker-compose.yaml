@@ -4,8 +4,8 @@ networks:
 secrets:
   package:
     file: secrets/package.txt
-  service_modelserving:
-    file: secrets/service_modelserving.txt
+  model_serving:
+    file: secrets/model_serving.txt
 services:
   pyproject_microservices-nginx:
     container_name: ${USER_NAME:-default}_${PROJECT_NAME}_nginx
@@ -20,57 +20,59 @@ services:
     restart: always
     volumes:
     - ../docs/_build/html:/usr/share/nginx/html:ro
-  pyproject_microservices-apigateway:
+  pyproject_microservices-api_gateway:
     build:
       context: ..
-      dockerfile: docker/apigateway.Dockerfile
-    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_apigateway
+      dockerfile: docker/api_gateway.Dockerfile
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_api_gateway
     env_file: .env
     environment:
     - PORT_APIGATEWAY=${PORT_APIGATEWAY}
     - PORT_FRONTEND=${PORT_FRONTEND}
     - PORT_MODELSERVING=${PORT_MODELSERVING}
-    image: ${PROJECT_NAME}_apigateway
+    image: ${PROJECT_NAME}_api_gateway
     networks:
     - ${NETWORK_NAME}
     ports:
     - ${PORT_APIGATEWAY}:${PORT_APIGATEWAY}
     volumes:
-    - ../service_apigateway:/usr/src/service_apigateway
-    - ../logs:/usr/src/service_apigateway/logs
-    - ../utils:/usr/src/service_apigateway/utils
-    - ../usr_vars:/usr/src/service_apigateway/usr_vars
-    - ./.env:/usr/src/service_apigateway/docker/.env
-  pyproject_microservices-frontend:
+    - ../pyproject_microservices/api_gateway:/usr/src/api_gateway
+    - ../pyproject_microservices/utils:/usr/src/api_gateway/api_gateway/utils
+    - ../logs:/usr/src/api_gateway/logs
+    - ../usr_vars:/usr/src/api_gateway/usr_vars
+    - ../.yapfignore:/usr/src/api_gateway/.yapfignore
+    - ./.env:/usr/src/api_gateway/docker/.env
+  pyproject_microservices-front_end:
     build:
       context: ..
-      dockerfile: docker/frontend.Dockerfile
-    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_frontend
+      dockerfile: docker/front_end.Dockerfile
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_front_end
     env_file: .env
     environment:
     - PORT_APIGATEWAY=${PORT_APIGATEWAY}
     - PORT_FRONTEND=${PORT_FRONTEND}
     - PORT_MODELSERVING=${PORT_MODELSERVING}
-    image: ${PROJECT_NAME}_frontend
+    image: ${PROJECT_NAME}_front_end
     networks:
     - ${NETWORK_NAME}
     ports:
     - ${PORT_FRONTEND}:8501
     restart: always
     volumes:
-    - ../service_frontend:/usr/src/service_frontend
-    - ../logs:/usr/src/service_frontend/logs
-    - ../utils:/usr/src/service_frontend/utils
-    - ../usr_vars:/usr/src/service_frontend/usr_vars
-    - ./.env:/usr/src/service_frontend/docker/.env
-  pyproject_microservices-modelserving:
+    - ../pyproject_microservices/front_end:/usr/src/front_end
+    - ../pyproject_microservices/utils:/usr/src/front_end/front_end/utils
+    - ../logs:/usr/src/front_end/logs
+    - ../usr_vars:/usr/src/front_end/usr_vars
+    - ../.yapfignore:/usr/src/front_end/.yapfignore
+    - ./.env:/usr/src/front_end/docker/.env
+  pyproject_microservices-model_serving:
     build:
       context: ..
-      dockerfile: docker/modelserving.Dockerfile
+      dockerfile: docker/model_serving.Dockerfile
       shm_size: 1g
     cap_add:
     - SYS_PTRACE
-    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_modelserving
+    container_name: ${USER_NAME:-default}_${PROJECT_NAME}_model_serving
     deploy:
       resources:
         reservations:
@@ -84,7 +86,7 @@ services:
     - PORT_JUPYTER=${PORT_JUPYTER}
     - PORT_MODELSERVING=${PORT_MODELSERVING}
     - PORT_PROFILE=${PORT_PROFILE}
-    image: ${PROJECT_NAME}_modelserving
+    image: ${PROJECT_NAME}_model_serving
     ipc: host
     networks:
     - ${NETWORK_NAME}
@@ -95,18 +97,19 @@ services:
     restart: always
     secrets:
     - package
-    - service_modelserving
+    - model_serving
     shm_size: 24g
     tty: true
     ulimits:
       memlock: -1
     volumes:
-    - ../service_modelserving:/usr/src/service_modelserving
-    - ${DATA_DIR}:/usr/src/service_modelserving/data
-    - ../logs:/usr/src/service_modelserving/logs
-    - ../utils:/usr/src/service_modelserving/utils
-    - ../usr_vars:/usr/src/service_modelserving/usr_vars
-    - ./.env:/usr/src/service_modelserving/docker/.env
-    - service_modelserving-secret:/usr/src/service_modelserving/docker/secrets
+    - ../pyproject_microservices/model_serving:/usr/src/model_serving
+    - ../pyproject_microservices/utils:/usr/src/model_serving/model_serving/utils
+    - ${DATA_DIR}:/usr/src/model_serving/data
+    - ../logs:/usr/src/model_serving/logs
+    - ../usr_vars:/usr/src/model_serving/usr_vars
+    - ../.yapfignore:/usr/src/model_serving/.yapfignore
+    - ./.env:/usr/src/model_serving/docker/.env
+    - model_serving-secret:/usr/src/model_serving/docker/secrets
 volumes:
-  service_modelserving-secret: null
+  model_serving-secret: null

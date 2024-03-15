@@ -139,17 +139,24 @@ docs-view: docker-up
 	@${BROWSER} http://localhost:$(PORT_NGINX) &
 
 format-style: docker-up
-	$(DOCKER_CMD) container exec $(USER_NAME)_service_modelserving yapf -i -p -r --style "pep8" /usr/src/service_modelserving
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
+	yapf -i -p -r --style "pep8" /usr/src/api_gateway
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_front_end \
+	yapf -i -p -r --style "pep8" /usr/src/front_end
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
+	yapf -i -p -r --style "pep8" /usr/src/model_serving
 
-getting-started: secret-templates docs-init
+getting-started: secret-templates
+    # TODO: add docs-init target back
 	@mkdir -p cache \
 	    && mkdir -p data \
 		&& mkdir -p htmlcov \
+		%% mkdir -p logs/apps \
 		%% mkdir -p logs/tests \
 		&& mkdir -p notebooks \
 		&& mkdir -p profiles \
 		&& mkdir -p wheels \
-		&& printf "%s\n" \
+		&& printf "Project started successfully%s\n"
 
 ipython: docker-up
 	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX)_python ipython
@@ -158,35 +165,6 @@ latexmk: docker-up
 	$(DOCKER_CMD) container exec -w $(TEX_WORKING_DIR) $(CONTAINER_PREFIX)_latex \
 		/bin/bash -c "latexmk -f -pdf $(TEX_FILE) && latexmk -c"
 
-mlflow: docker-up mlflow-server
-		&& printf "%s\n" \
-			"" \
-			"" \
-			"" \
-			"####################################################################" \
-			"Use this link on the host to access the MLFlow server." \
-			"" \
-			"http://localhost:$(PORT_MLFLOW)" \
-			"" \
-			"####################################################################"
-
-mlflow-clean: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python mlflow gc
-
-mlflow-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"mlflow server \
-				--host 0.0.0.0 \
-				&"
-
-mlflow-stop-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pkill -f gunicorn
-
-mongo-create-user:
-	@sleep 2
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_mongo /docker-entrypoint-initdb.d/create_user.sh
-
 new-network:
 	@read -p "Enter the new network name: " NEW_NETWORK; \
 	NEW_NETWORK=$${NEW_NETWORK:-$(PROJECT)-network}; \
@@ -194,7 +172,7 @@ new-network:
 
 new-project:
 	@read -p "Enter the new project name: " NEW_PROJECT; \
-	./scripts/update_project_name.sh $(PROJECT) $$NEW_PROJECT
+	./scripts/create_new_project.sh $(PROJECT) $$NEW_PROJECT
 
 notebook: docker-up notebook-server
 	@printf "%s\n" \
@@ -252,16 +230,10 @@ else ifeq ("${PKG_MANAGER}", "pip")
 			"pip freeze -l --exclude $(PROJECT) >> requirements.txt"
 endif
 
-pgadmin: docker-up
-	${BROWSER} http://localhost:$(PORT_DATABASE_ADMINISTRATION) &
-
 profile: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
 		/bin/bash -c \
 			"python -m cProfile -o $(PROFILE_PATH) $(PROFILE_PY)"
-psql: docker-up
-	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX)_postgres \
-		psql -U ${POSTGRES_USER} $(PROJECT)
 
 secret-templates:
 	@mkdir -p docker/secrets \
@@ -272,7 +244,7 @@ secret-templates:
 		&& printf '%s' "password" > 'db_password.txt' \
 		&& printf '%s' "username" > 'db_username.txt' \
 		&& printf '%s' "$(PROJECT)" > 'package.txt' \
-		&& printf '%s' "service_modelserving" > 'service_modelserving.txt'
+		&& printf '%s' "model_serving" > 'model_serving.txt'
 
 snakeviz: docker-up profile snakeviz-server
 	@sleep 0.5
@@ -311,16 +283,13 @@ tensorboard-stop-server: docker-up
 			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
 
 test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
-test:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_apigateway \
-		sh -c 'py.test $(PROJECT) | tee -a logs/tests/apigateway-$(timestamp)_log.txt'
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_frontend \
-		sh -c 'py.test $(PROJECT) | tee -a logs/tests/frontend-$(timestamp)_log.txt'
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_modelserving \
-		sh -c 'py.test $(PROJECT) | tee -a logs/tests/modelserving-$(timestamp)_log.txt'
-
-test-getting-started:
-	@cd service_apigateway && make getting-started
+test: docker-up format-style
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
+		sh -c 'py.test api_gateway | tee -a logs/tests/api_gateway-$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_front_end \
+		sh -c 'py.test front_end | tee -a logs/tests/front_end-$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
+		sh -c 'py.test model_serving | tee -a logs/tests/model_serving-$(timestamp)_log.txt'
 
 test-coverage: test
 	@${BROWSER} htmlcov/index.html &

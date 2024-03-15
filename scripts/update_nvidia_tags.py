@@ -6,9 +6,7 @@
 import re
 import urllib.request
 
-from service_modelserving.service_modelserving import PACKAGE_ROOT
-
-DOCKER_DIR = PACKAGE_ROOT / 'docker'
+DOCKER_DIR = 'docker'
 NVIDIA_NGC_URL = 'https://catalog.ngc.nvidia.com/orgs/nvidia/containers/'
 REGEX = r'(?<=latestTag":")(.*?)(?=")'
 FRAMEWORKS = (
@@ -26,7 +24,7 @@ def update_dockerfiles():
         match = re.search(REGEX, text)
         tag = match.group(0)
 
-        with open(DOCKER_DIR / f'{framework}.Dockerfile', 'r+') as f:
+        with open(f'DOCKER_DIR/{framework}.Dockerfile', 'r+') as f:
             lines = f.readlines()
             lines[0] = lines[0].replace('\n', f'{tag}\n')
             f.seek(0)

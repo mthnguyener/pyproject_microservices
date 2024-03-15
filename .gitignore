@@ -26,6 +26,9 @@
 # Environments
 *venv/*
 
+# Formatting
+pyproject_microservices/*/.yapfignore
+
 # Ipython files
 *.ipynb_checkpoints
 
