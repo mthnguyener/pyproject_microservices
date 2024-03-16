@@ -1,11 +1,14 @@
 PROJECT=pyproject_microservices
 SERVICE=api_gateway
 
-ifeq (, $(wildcard docker/.env))
-        $(shell ln -s ../usr_vars docker/.env)
+ifeq (,$(wildcard docker/.env))
+    $(shell ln -s ../usr_vars docker/.env 2>/dev/null)
 endif
-include usr_vars
-export
+
+ifneq (,$(wildcard usr_vars))
+    include usr_vars
+    export
+endif
 
 ifeq ("$(shell uname -s)", "Linux*")
 	BROWSER=/usr/bin/firefox

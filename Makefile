@@ -100,7 +100,7 @@ format-style: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
 	yapf -i -p -r --style "pep8" /usr/src/model_serving
 
-getting-started: secret-templates docs-init
+getting-started: secret-templates
     # TODO: add docs-init target back
 	@mkdir -p cache \
 	    && mkdir -p data \

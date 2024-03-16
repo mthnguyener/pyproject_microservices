@@ -1,4 +1,4 @@
-Budd-E module
+Model Serving module
 ===============
 
 .. automodule:: app

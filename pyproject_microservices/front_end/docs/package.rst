@@ -1,4 +1,4 @@
-Budd-E module
+Front-End module
 ===============
 
 .. automodule:: app

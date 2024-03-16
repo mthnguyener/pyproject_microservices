@@ -1,4 +1,4 @@
-Budd-E module
+API Gateway module
 ===============
 
 .. automodule:: app

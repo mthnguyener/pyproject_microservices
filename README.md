@@ -152,6 +152,13 @@ make docs
 make docs-view
 ```
 
+### Documentation are viewable at the following urls:
+```bash
+http://localhost:<PORT_NGINX>/api_gateway/
+http://localhost:<PORT_NGINX>/front_end/
+http://localhost:<PORT_NGINX>/model_serving/
+```
+
 ## Profilers
 Before refactoring it's usually a ***great*** idea to profile the code.
 The following methods describe the profilers that are available in the 
