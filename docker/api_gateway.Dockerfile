@@ -5,7 +5,10 @@ WORKDIR /usr/src/api_gateway
 COPY ../pyproject_microservices/api_gateway .
 
 RUN pip install --upgrade pip \
-	&& pip install -e .[all] \
+    && pip install -e .[all] \
+    && apt update -y \
+#    && apt -y upgrade \
+#    && apt-get install -y \
     && pip install --no-cache-dir -r \
         requirements.txt \
 	&& rm -rf /tmp/* \

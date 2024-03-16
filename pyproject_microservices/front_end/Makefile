@@ -1,5 +1,5 @@
 PROJECT=pyproject_microservices
-SERVICE=api_gateway
+SERVICE=front_end
 
 ifeq (, $(wildcard docker/.env))
         $(shell ln -s ../usr_vars docker/.env)

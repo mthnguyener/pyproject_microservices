@@ -19,7 +19,9 @@ services:
     - ${PORT_NGINX}:80
     restart: always
     volumes:
-    - ../docs/_build/html:/usr/share/nginx/html:ro
+    - ../pyproject_microservices/api_gateway/docs/_build:/usr/share/nginx/html/api_gateway:ro
+    - ../pyproject_microservices/front_end/docs/_build:/usr/share/nginx/html/front_end:ro
+    - ../pyproject_microservices/model_serving/docs/_build:/usr/share/nginx/html/model_serving:ro
   pyproject_microservices-api_gateway:
     build:
       context: ..
