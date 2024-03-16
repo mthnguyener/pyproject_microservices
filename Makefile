@@ -70,7 +70,7 @@ docs: docker-up
 	@cd pyproject_microservices/api_gateway && make docs
 # 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
 # 		/bin/bash -c "cd docs && make html"
-	@${BROWSER} http://localhost:$(PORT_NGINX) 2>&1 &
+# 	@${BROWSER} http://localhost:$(PORT_NGINX) 2>&1 &
 
 docs-first-run-delete: docker-up
 	@cd pyproject_microservices/api_gateway && make docs-first-run-delete
@@ -150,7 +150,7 @@ format-style: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
 	yapf -i -p -r --style "pep8" /usr/src/model_serving
 
-getting-started: secret-templates docker-up
+getting-started: secret-templates docs-init
     # TODO: add docs-init target back
 	@mkdir -p cache \
 	    && mkdir -p data \

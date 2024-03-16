@@ -23,7 +23,7 @@ USER_ID:=$(shell id -u $(USER))
 VERSION=$(shell echo $(shell cat $(SERVICE)/__init__.py | grep "^__version__" | cut -d = -f 2))
 
 docs:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_test \
 		/bin/bash -c "cd docs && make html"
 	@${BROWSER} http://localhost:$(PORT_NGINX) 2>&1 &
 
@@ -72,14 +72,14 @@ else
 endif
 
 docs-init:
-	@rm -rf docs/*
+	@rm -rf pyproject_microservices/api_gateway/docs/*
 	@$(DOCKER_COMPOSE_CMD) -f ../../docker/docker-compose.yaml  up -d
 	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(SERVICE) $(PROJECT)_$(SERVICE) \
 		/bin/bash -c \
 			"mkdir -p /usr/src/$(SERVICE)/docs \
 			 && cd /usr/src/$(SERVICE)/docs \
 			 && sphinx-quickstart -q \
-				-p $(PROJECT) \
+				-p $(SERVICE) \
 				-a "Minh Nguyen" \
 				-v $(VERSION) \
 				--ext-autodoc \
@@ -90,7 +90,7 @@ docs-init:
 			 adduser --system --no-create-home --uid $(USER_ID) --group $(USER) &> /dev/null \
 			 chown -R $(USER):$(USER) docs"
 	@git fetch
-	@git checkout origin/main -- pyproject_microservices/api_gatewaydocs/
+	@git checkout origin/main -- pyproject_microservices/api_gateway/docs/
 
 docs-view:
 	@${BROWSER} http://localhost:$(PORT_NGINX) &
