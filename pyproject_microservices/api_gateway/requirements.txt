@@ -1,0 +1,6 @@
+asyncio
+fastapi
+httpx
+loguru
+requests
+uvicorn

@@ -1,42 +1,37 @@
-#  PyProject Microservices Template
-PyProject Microservices Template is a Python based microservices project template. 
+#  pyproject_microservices
+pyproject_microservices is a Python based microservices project template. 
 The template will have sample endpoints and a generic microservices architecture.
 
-This template builds on top of Timothy Helton's Pyproject Generator: 
-https://github.com/TimothyHelton/pyproject_generator
+This template builds on top of PyProject Starter: 
+https://github.com/mthnguyener/pyproject_starter
 
 <img src="./assets/microservices_diagram.png" alt="Microservice Diagram" width="768" height="auto"/>
 
-## PyProject Template Structure
+## pyproject_microservices Structure
 - `docker`: Docker directory
-  - `mongo_init`: Folder with mongo init related files
   - `Dockerfile`: Dockerfiles for building Docker container images
   - `docker-compose.yaml`: Yaml file used by Docker Compose to define the services, 
   networks, and volumes for a multi-container application
 - `docs`: Folder used by sphinx for auto-documentation
-- `pyproject_microservices`: Project main directory - additional services are added here
-  - `apigateway`: API Gateway service for managing and routing requests
-  - `base`: Base scripts that can be used by all microservices but could also be
-  your model or main python service
-    - `configs`: Base configuration files
-    - `test`: Base unit tests
-  - `data management`: Data Management service for data related tasks (ETL)
-  - `modelinference`: Model Inference service processing incoming data and 
+- `pyproject_microservices`: Contains services and utility directories
+  - `api_gateway (COMPLETED)`: API Gateway service for managing and routing requests
+  - `data_management`: Data Management service for data related tasks (ETL)
+  - `front_end (COMPLETED)`: Streamlit service with sample pages (missing test atm)
+  - `model_inference`: Model Inference service processing incoming data and 
   returning inference results to the requesting applications.
-  - `modelserving`: Model Serving service providing an interface for external systems 
+  - `model_serving (COMPLETED)`: Model Serving service providing an interface for external systems 
   to interact with the models.
-  - `modeltraining`: Model Training service training machine learning models
+  - `model_training`: Model Training service training machine learning models
   - `monitoring`: Monitoring and Logging service overseeing the health, performance, 
   and operational aspects of the entire microservices architecture
-  - `streamlit`: Streamlit service with sample pages (missing test atm)
+  - `utils`: Folder containing util functions and variables
 - `scripts`: Folder with setup related scripts
 
 Notes: future updates will include Endpoints as I continue to update other microservices
 
 ## Setting Up New Project
 1. From current project root directory, run:
-   - `make create-project`
-     - `Enter the old project name: pyproject_microservices`
+   - `make new-project`
      - `Enter the new project name: new_project`
 1. Current project directories and files are created in the new project directory
     - `new_project/`

@@ -1,0 +1,7 @@
+asyncio
+fastapi
+httpx
+loguru
+requests
+streamlit
+uvicorn

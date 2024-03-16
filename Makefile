@@ -15,10 +15,10 @@ else
 	BROWSER=open
 endif
 
-CONTAINER_PREFIX:=$(COMPOSE_PROJECT_NAME)_$(PROJECT)
+CONTAINER_PREFIX:=$(USER_NAME)_$(PROJECT)
 DOCKER_CMD=docker
 DOCKER_COMPOSE_CMD=docker compose
-DOCKER_IMAGE=$(shell head -n 1 docker/python.Dockerfile | cut -d ' ' -f 2)
+# DOCKER_IMAGE=$(shell head -n 1 docker/python.Dockerfile | cut -d ' ' -f 2)
 PKG_MANAGER=pip
 PROFILE_PY:=""
 PROFILE_PROF:=$(notdir $(PROFILE_PY:.py=.prof))
@@ -28,7 +28,7 @@ TENSORBOARD_DIR:="ai_logs"
 TEX_WORKING_DIR=${SRC_DIR}/${TEX_DIR}
 USER:=$(shell echo $${USER%%@*})
 USER_ID:=$(shell id -u $(USER))
-VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
+# VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
 
 .PHONY: docs format-style upgrade-packages
 
@@ -39,11 +39,6 @@ cpp-build:
 		&& cmake .. \
 		&& cmake --build . \
 		&& cp lib/*.so* ../lib
-
-create-project:
-	@read -p "Enter the old project name: " old_name; \
-	read -p "Enter the new project name: " new_name; \
-	./scripts/update_project_name.sh $$old_name $$new_name
 
 deploy: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pip3 wheel --wheel-dir=wheels .[all]
@@ -72,89 +67,100 @@ docker-update-compose-file:
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python scripts/docker_config.py
 
 docs: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c "cd docs && make html"
+	@cd pyproject_microservices/api_gateway && make docs
+# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+# 		/bin/bash -c "cd docs && make html"
 	@${BROWSER} http://localhost:$(PORT_NGINX) 2>&1 &
 
 docs-first-run-delete: docker-up
-	find docs -maxdepth 1 -type f -delete
-	$(DOCKER_CMD) container exec $(PROJECT)_python \
-		/bin/bash -c \
-			"cd docs \
-			 && sphinx-quickstart -q \
-				-p $(PROJECT) \
-				-a "Minh Nguyen" \
-				-v $(VERSION) \
-				--ext-autodoc \
-				--ext-viewcode \
-				--makefile \
-				--no-batchfile"
-	$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml restart nginx
-ifeq ("$(shell git remote)", "origin")
-	git fetch
-	git checkout origin/main -- docs/
-else
-	$(DOCKER_CMD) container run --rm \
-		-v `pwd`:/usr/src/$(PROJECT) \
-		-w /usr/src/$(PROJECT)/docs \
-		ubuntu \
-		/bin/bash -c \
-			"sed -i -e 's/# import os/import os/g' conf.py \
-			 && sed -i -e 's/# import sys/import sys/g' conf.py \
-			 && sed -i \"/# sys.path.insert(0, os.path.abspath('.'))/d\" \
-				conf.py \
-			 && sed -i -e \"/import sys/a \
-				from pyproject_microservices import __version__ \
-				\n\nsys.path.insert(0, os.path.abspath('../pyproject_microservices'))\" \
-				conf.py \
-			 && sed -i -e \"s/version = '0.1.0'/version = __version__/g\" \
-				conf.py \
-			 && sed -i -e \"s/release = '0.1.0'/release = __version__/g\" \
-				conf.py \
-			 && sed -i -e \"s/alabaster/sphinx_rtd_theme/g\" \
-				conf.py \
-			 && sed -i -e 's/[ \t]*$$//g' conf.py \
-			 && echo >> conf.py \
-			 && sed -i \"/   :caption: Contents:/a \
-				\\\\\n   package\" \
-				index.rst"
-endif
+	@cd pyproject_microservices/api_gateway && make docs-first-run-delete
+# 	find docs -maxdepth 1 -type f -delete
+# 	$(DOCKER_CMD) container exec $(PROJECT)_python \
+# 		/bin/bash -c \
+# 			"cd docs \
+# 			 && sphinx-quickstart -q \
+# 				-p $(PROJECT) \
+# 				-a "Minh Nguyen" \
+# 				-v $(VERSION) \
+# 				--ext-autodoc \
+# 				--ext-viewcode \
+# 				--makefile \
+# 				--no-batchfile"
+# 	$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml restart nginx
+# ifeq ("$(shell git remote)", "origin")
+# 	git fetch
+# 	git checkout origin/main -- docs/
+# else
+# 	$(DOCKER_CMD) container run --rm \
+# 		-v `pwd`:/usr/src/$(PROJECT) \
+# 		-w /usr/src/$(PROJECT)/docs \
+# 		ubuntu \
+# 		/bin/bash -c \
+# 			"sed -i -e 's/# import os/import os/g' conf.py \
+# 			 && sed -i -e 's/# import sys/import sys/g' conf.py \
+# 			 && sed -i \"/# sys.path.insert(0, os.path.abspath('.'))/d\" \
+# 				conf.py \
+# 			 && sed -i -e \"/import sys/a \
+# 				from pyproject_microservices import __version__ \
+# 				\n\nsys.path.insert(0, os.path.abspath('../pyproject_microservices'))\" \
+# 				conf.py \
+# 			 && sed -i -e \"s/version = '0.1.0'/version = __version__/g\" \
+# 				conf.py \
+# 			 && sed -i -e \"s/release = '0.1.0'/release = __version__/g\" \
+# 				conf.py \
+# 			 && sed -i -e \"s/alabaster/sphinx_rtd_theme/g\" \
+# 				conf.py \
+# 			 && sed -i -e 's/[ \t]*$$//g' conf.py \
+# 			 && echo >> conf.py \
+# 			 && sed -i \"/   :caption: Contents:/a \
+# 				\\\\\n   package\" \
+# 				index.rst"
+# endif
 
 docs-init:
-	@rm -rf docs/*
-	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml  up -d
-	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(PROJECT) $(PROJECT)_python \
-		/bin/bash -c \
-			"cd /usr/src/$(PROJECT)/docs \
-			 && sphinx-quickstart -q \
-				-p $(PROJECT) \
-				-a "Minh Nguyen" \
-				-v $(VERSION) \
-				--ext-autodoc \
-				--ext-viewcode \
-				--makefile \
-				--no-batchfile \
-			 && cd .. \
-			 adduser --system --no-create-home --uid $(USER_ID) --group $(USER) &> /dev/null \
-			 chown -R $(USER):$(USER) docs"
-	@git fetch
-	@git checkout origin/main -- docs/
+	@cd pyproject_microservices/api_gateway && make docs-init
+# 	@rm -rf docs/*
+# 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml  up -d
+# 	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(PROJECT) $(PROJECT)_python \
+# 		/bin/bash -c \
+# 			"cd /usr/src/$(PROJECT)/docs \
+# 			 && sphinx-quickstart -q \
+# 				-p $(PROJECT) \
+# 				-a "Minh Nguyen" \
+# 				-v $(VERSION) \
+# 				--ext-autodoc \
+# 				--ext-viewcode \
+# 				--makefile \
+# 				--no-batchfile \
+# 			 && cd .. \
+# 			 adduser --system --no-create-home --uid $(USER_ID) --group $(USER) &> /dev/null \
+# 			 chown -R $(USER):$(USER) docs"
+# 	@git fetch
+# 	@git checkout origin/main -- docs/
 
 docs-view: docker-up
-	@${BROWSER} http://localhost:$(PORT_NGINX) &
+	@cd pyproject_microservices/api_gateway && make docs-init
+# 	@${BROWSER} http://localhost:$(PORT_NGINX) &
 
 format-style: docker-up
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python yapf -i -p -r --style "pep8" ${SRC_DIR}
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
+	yapf -i -p -r --style "pep8" /usr/src/api_gateway
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_front_end \
+	yapf -i -p -r --style "pep8" /usr/src/front_end
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
+	yapf -i -p -r --style "pep8" /usr/src/model_serving
 
-getting-started: secret-templates docs-init
+getting-started: secret-templates docker-up
+    # TODO: add docs-init target back
 	@mkdir -p cache \
 	    && mkdir -p data \
 		&& mkdir -p htmlcov \
+		%% mkdir -p logs/apps \
 		%% mkdir -p logs/tests \
 		&& mkdir -p notebooks \
 		&& mkdir -p profiles \
 		&& mkdir -p wheels \
-		&& printf "%s\n" \
+		&& printf "Project started successfully%s\n"
 
 ipython: docker-up
 	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX)_python ipython
@@ -163,34 +169,14 @@ latexmk: docker-up
 	$(DOCKER_CMD) container exec -w $(TEX_WORKING_DIR) $(CONTAINER_PREFIX)_latex \
 		/bin/bash -c "latexmk -f -pdf $(TEX_FILE) && latexmk -c"
 
-mlflow: docker-up mlflow-server
-		&& printf "%s\n" \
-			"" \
-			"" \
-			"" \
-			"####################################################################" \
-			"Use this link on the host to access the MLFlow server." \
-			"" \
-			"http://localhost:$(PORT_MLFLOW)" \
-			"" \
-			"####################################################################"
+new-network:
+	@read -p "Enter the new network name: " NEW_NETWORK; \
+	NEW_NETWORK=$${NEW_NETWORK:-$(PROJECT)-network}; \
+	./scripts/update_network_name.sh $$NEW_NETWORK
 
-mlflow-clean: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python mlflow gc
-
-mlflow-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"mlflow server \
-				--host 0.0.0.0 \
-				&"
-
-mlflow-stop-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pkill -f gunicorn
-
-mongo-create-user:
-	@sleep 2
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_mongo /docker-entrypoint-initdb.d/create_user.sh
+new-project:
+	@read -p "Enter the new project name: " NEW_PROJECT; \
+	./scripts/create_new_project.sh $(PROJECT) $$NEW_PROJECT
 
 notebook: docker-up notebook-server
 	@printf "%s\n" \
@@ -234,7 +220,7 @@ notebook-stop-server:
 package-dependencies: docker-up
 	@printf "%s\n" \
 		"# ${PROJECT} Version: $(VERSION)" \
-		"# From NVIDIA NGC CONTAINER: $(DOCKER_IMAGE)" \
+# 		"# From NVIDIA NGC CONTAINER: $(DOCKER_IMAGE)" \
 		"#" \
 		> requirements.txt
 ifeq ("${PKG_MANAGER}", "conda")
@@ -248,16 +234,10 @@ else ifeq ("${PKG_MANAGER}", "pip")
 			"pip freeze -l --exclude $(PROJECT) >> requirements.txt"
 endif
 
-pgadmin: docker-up
-	${BROWSER} http://localhost:$(PORT_DATABASE_ADMINISTRATION) &
-
 profile: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
 		/bin/bash -c \
 			"python -m cProfile -o $(PROFILE_PATH) $(PROFILE_PY)"
-psql: docker-up
-	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX)_postgres \
-		psql -U ${POSTGRES_USER} $(PROJECT)
 
 secret-templates:
 	@mkdir -p docker/secrets \
@@ -267,7 +247,8 @@ secret-templates:
 		&& printf '%s' "admin" > 'db_init_username.txt' \
 		&& printf '%s' "password" > 'db_password.txt' \
 		&& printf '%s' "username" > 'db_username.txt' \
-		&& printf '%s' "$(PROJECT)" > 'package.txt'
+		&& printf '%s' "$(PROJECT)" > 'package.txt' \
+		&& printf '%s' "model_serving" > 'model_serving.txt'
 
 snakeviz: docker-up profile snakeviz-server
 	@sleep 0.5
@@ -307,14 +288,12 @@ tensorboard-stop-server: docker-up
 
 test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
 test: docker-up format-style
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		sh -c 'echo "Installing packages for testing....." \
-		&& pip install -r requirements-dev.txt > logs/tests/$(timestamp)_log.txt'
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		sh -c 'py.test $(PROJECT) | tee -a logs/tests/$(timestamp)_log.txt'
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		sh -c 'echo "Removing packages that was used for testing....." \
-		&& yes | pip uninstall -r requirements-dev.txt >> logs/tests/$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
+		sh -c 'py.test api_gateway | tee -a logs/tests/api_gateway-$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_front_end \
+		sh -c 'py.test front_end | tee -a logs/tests/front_end-$(timestamp)_log.txt'
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
+		sh -c 'py.test model_serving | tee -a logs/tests/model_serving-$(timestamp)_log.txt'
 
 test-coverage: test
 	@${BROWSER} htmlcov/index.html &

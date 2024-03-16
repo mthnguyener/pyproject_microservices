@@ -5,25 +5,28 @@
 """
 from enum import Enum
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
 import yaml
 
-from pyproject_microservices.base.pkg_globals import PACKAGE_ROOT
+from pyproject_starter.pkg_globals import PACKAGE_ROOT
 
 logger = logging.getLogger('package')
+
+PROJECT_NAME = os.getenv('PROJECT_NAME')
 
 
 class ComposeService(Enum):
     """Implemented Docker Compose services."""
-    LATEX = 'latex'
-    MONGO = 'mongo'
-    NGINX = 'nginx'
-    POSTGRES = 'postgres'
-    PGADMIN = 'pgadmin'
-    PYTHON = 'base'
-    STREAMLIT = 'streamlit'
+    LATEX = f'{PROJECT_NAME}_latex'
+    MONGO = f'{PROJECT_NAME}_mongo'
+    NGINX = f'{PROJECT_NAME}_nginx'
+    POSTGRES = f'{PROJECT_NAME}_postgres'
+    PGADMIN = f'{PROJECT_NAME}_pgadmin'
+    PYTHON = f'{PROJECT_NAME}_python'
+    FRONTEND = f'{PROJECT_NAME}_front_end'
 
 
 class ComposeConfiguration:
@@ -44,8 +47,8 @@ class ComposeConfiguration:
                      self._config)
 
         self._container_prefix = (
-            self._config['services']['base']['container_name'].rsplit('_',
-                                                                      1)[0])
+            self._config['services'][f'{PROJECT_NAME}_nginx']['container_name'].rsplit(
+                '_', 1)[0])
         self._package = self._container_prefix.rsplit('}_', 1)[1]
         self._network = f'{self._package}-network'
         self._volume_db = f'{self._package}-db'
@@ -96,7 +99,7 @@ class ComposeConfiguration:
             **self._config.get('secrets', {}),
             **secrets,
         }
-        self._config['services']['base']['secrets'] = [
+        self._config['services'][f'{PROJECT_NAME}_python']['secrets'] = [
             'db-database',
             'db-password',
             'db-username',
@@ -111,9 +114,9 @@ class ComposeConfiguration:
             'name': f'{self._container_prefix}-db'
         }
 
-    def _add_latex(self):
+    def _add_pyproject_starter_latex(self):
         """Add LaTeX service to configuration."""
-        self._config['services']['latex'] = {
+        self._config['services'][f'{PROJECT_NAME}_latex'] = {
             'container_name': f'{self._container_prefix}_latex',
             'image': 'blang/latex',
             'networks': [self._network],
@@ -126,9 +129,9 @@ class ComposeConfiguration:
             'working_dir': self._working_dir,
         }
 
-    def _add_mongo(self):
+    def _add_pyproject_starter_mongo(self):
         """Add MongoDB service to configuration."""
-        self._config['services']['mongo'] = {
+        self._config['services'][f'{PROJECT_NAME}_mongo'] = {
             'container_name':
             f'{self._container_prefix}_mongo',
             'image':
@@ -167,7 +170,7 @@ class ComposeConfiguration:
         self._mongo_create_user_js()
         self._mongo_create_user_sh()
 
-    def _mongo_create_user_js(self):
+    def _mongo_pyproject_starter_create_user_js(self):
         """Write JS script to create MongoDB user."""
         text = [
             'const fs = require("fs")',
@@ -220,9 +223,9 @@ class ComposeConfiguration:
         with open(self._mongo_init_dir / 'create_user.sh', 'w') as f:
             f.writelines('\n'.join(text))
 
-    def _add_nginx(self):
+    def _add_pyproject_starter_nginx(self):
         """Add NGINX service to configuration."""
-        self._config['services']['nginx'] = {
+        self._config['services'][f'{PROJECT_NAME}_nginx'] = {
             'container_name':
             f'{self._container_prefix}_nginx',
             'env_file':
@@ -244,9 +247,40 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_postgres(self):
+    def _add_pyproject_starter_front_end(self):
+        """Add Front-End service to configuration."""
+        self._config['services'][f'{PROJECT_NAME}_front_end'] = {
+            'build': {
+                'context': '..',
+                'dockerfile': 'docker/front_end.Dockerfile',
+            },
+            'container_name':
+            f'{self._container_prefix}_front_end',
+            'env_file':
+            '.env',
+            'image':
+            f'{self._package}_front_end',
+            'environment': {
+                'PORT_STREAMLIT': '${PORT_STREAMLIT}',
+            },
+            'networks': [self._network],
+            'ports': ['$PORT_STREAMLIT:8501'],
+            'restart':
+            'always',
+            'volumes': [
+                f'../pyproject_microservices/front_end:/usr/src/front_end',
+                f'../pyproject_microservices/utils:/usr/src/front_end/'
+                f'front_end/utils',
+                f'../logs:/usr/src/front_end/logs',
+                f'../usr_vars:/usr/src/front_end/usr_vars',
+                f'../.yapfignore:/usr/src/front_end/.yapfignore',
+                f'./.env:/usr/src/front_end/docker/.env',
+            ],
+        }
+
+    def _add_pyproject_starter_postgres(self):
         """Add PostgreSQL service to configuration."""
-        self._config['services']['postgres'] = {
+        self._config['services'][f'{PROJECT_NAME}_postgres'] = {
             'container_name':
             f'{self._container_prefix}_postgres',
             'env_file':
@@ -278,9 +312,9 @@ class ComposeConfiguration:
         self._update_depends_on(ComposeService.POSTGRES)
         self._add_secrets()
 
-    def _add_pgadmin(self):
+    def _add_pyproject_starter_pgadmin(self):
         """Add PGAdmin service to configuration."""
-        self._config['services']['pgadmin'] = {
+        self._config['services'][f'{PROJECT_NAME}_pgadmin'] = {
             'container_name':
             f'{self._container_prefix}_pgadmin',
             'env_file':
@@ -308,42 +342,15 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_streamlit(self):
-        """Add Streamlit service to configuration."""
-        self._config['services']['streamlit'] = {
-            'build': {
-                'context': '..',
-                'dockerfile': 'docker/streamlit.Dockerfile',
-            },
-            'container_name':
-            f'{self._container_prefix}_streamlit',
-            'env_file':
-            '.env',
-            'image':
-            f'{self._package}_streamlit',
-            'environment': {
-                'PORT_STREAMLIT': '${PORT_STREAMLIT}',
-            },
-            'networks': [self._network],
-            'ports': ['$PORT_STREAMLIT:8501'],
-            'restart':
-            'always',
-            'volumes': [
-                f'../{self._package}/streamlit:'
-                f'/usr/src/pyproject_microservices/'
-                f'pyproject_microservices/streamlit',
-            ],
-        }
-
     def _update_depends_on(self, service_name: ComposeService):
         """Update the Python service `depends_on` tag."""
-        py_tag = self._config['services']['base']
+        py_tag = self._config['services'][f'{PROJECT_NAME}_python']
         py_tag['depends_on'] = (py_tag.get('depends_on', []) +
                                 [service_name.value])
 
     def add_gpu(self):
         """Add GPU configuration to Python container."""
-        py_service = self._config['services']['base']
+        py_service = self._config['services'][f'{PROJECT_NAME}_python']
         py_service['build']['shm_size'] = '1g'
         py_service['cap_add'] = ['SYS_PTRACE']
         py_service['deploy'] = {
@@ -396,7 +403,7 @@ class ComposeConfiguration:
 
 if __name__ == '__main__':
     config = ComposeConfiguration()
-    services = (ComposeService.STREAMLIT, )
+    services = (ComposeService.FRONTEND, )
     for s in services:
         config.add_service(s)
     config.add_gpu()
