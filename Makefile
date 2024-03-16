@@ -67,76 +67,80 @@ docker-update-compose-file:
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python scripts/docker_config.py
 
 docs: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c "cd docs && make html"
+	@cd pyproject_microservices/api_gateway && make docs
+# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+# 		/bin/bash -c "cd docs && make html"
 	@${BROWSER} http://localhost:$(PORT_NGINX) 2>&1 &
 
 docs-first-run-delete: docker-up
-	find docs -maxdepth 1 -type f -delete
-	$(DOCKER_CMD) container exec $(PROJECT)_python \
-		/bin/bash -c \
-			"cd docs \
-			 && sphinx-quickstart -q \
-				-p $(PROJECT) \
-				-a "Minh Nguyen" \
-				-v $(VERSION) \
-				--ext-autodoc \
-				--ext-viewcode \
-				--makefile \
-				--no-batchfile"
-	$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml restart nginx
-ifeq ("$(shell git remote)", "origin")
-	git fetch
-	git checkout origin/main -- docs/
-else
-	$(DOCKER_CMD) container run --rm \
-		-v `pwd`:/usr/src/$(PROJECT) \
-		-w /usr/src/$(PROJECT)/docs \
-		ubuntu \
-		/bin/bash -c \
-			"sed -i -e 's/# import os/import os/g' conf.py \
-			 && sed -i -e 's/# import sys/import sys/g' conf.py \
-			 && sed -i \"/# sys.path.insert(0, os.path.abspath('.'))/d\" \
-				conf.py \
-			 && sed -i -e \"/import sys/a \
-				from pyproject_microservices import __version__ \
-				\n\nsys.path.insert(0, os.path.abspath('../pyproject_microservices'))\" \
-				conf.py \
-			 && sed -i -e \"s/version = '0.1.0'/version = __version__/g\" \
-				conf.py \
-			 && sed -i -e \"s/release = '0.1.0'/release = __version__/g\" \
-				conf.py \
-			 && sed -i -e \"s/alabaster/sphinx_rtd_theme/g\" \
-				conf.py \
-			 && sed -i -e 's/[ \t]*$$//g' conf.py \
-			 && echo >> conf.py \
-			 && sed -i \"/   :caption: Contents:/a \
-				\\\\\n   package\" \
-				index.rst"
-endif
+	@cd pyproject_microservices/api_gateway && make docs-first-run-delete
+# 	find docs -maxdepth 1 -type f -delete
+# 	$(DOCKER_CMD) container exec $(PROJECT)_python \
+# 		/bin/bash -c \
+# 			"cd docs \
+# 			 && sphinx-quickstart -q \
+# 				-p $(PROJECT) \
+# 				-a "Minh Nguyen" \
+# 				-v $(VERSION) \
+# 				--ext-autodoc \
+# 				--ext-viewcode \
+# 				--makefile \
+# 				--no-batchfile"
+# 	$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml restart nginx
+# ifeq ("$(shell git remote)", "origin")
+# 	git fetch
+# 	git checkout origin/main -- docs/
+# else
+# 	$(DOCKER_CMD) container run --rm \
+# 		-v `pwd`:/usr/src/$(PROJECT) \
+# 		-w /usr/src/$(PROJECT)/docs \
+# 		ubuntu \
+# 		/bin/bash -c \
+# 			"sed -i -e 's/# import os/import os/g' conf.py \
+# 			 && sed -i -e 's/# import sys/import sys/g' conf.py \
+# 			 && sed -i \"/# sys.path.insert(0, os.path.abspath('.'))/d\" \
+# 				conf.py \
+# 			 && sed -i -e \"/import sys/a \
+# 				from pyproject_microservices import __version__ \
+# 				\n\nsys.path.insert(0, os.path.abspath('../pyproject_microservices'))\" \
+# 				conf.py \
+# 			 && sed -i -e \"s/version = '0.1.0'/version = __version__/g\" \
+# 				conf.py \
+# 			 && sed -i -e \"s/release = '0.1.0'/release = __version__/g\" \
+# 				conf.py \
+# 			 && sed -i -e \"s/alabaster/sphinx_rtd_theme/g\" \
+# 				conf.py \
+# 			 && sed -i -e 's/[ \t]*$$//g' conf.py \
+# 			 && echo >> conf.py \
+# 			 && sed -i \"/   :caption: Contents:/a \
+# 				\\\\\n   package\" \
+# 				index.rst"
+# endif
 
 docs-init:
-	@rm -rf docs/*
-	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml  up -d
-	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(PROJECT) $(PROJECT)_python \
-		/bin/bash -c \
-			"cd /usr/src/$(PROJECT)/docs \
-			 && sphinx-quickstart -q \
-				-p $(PROJECT) \
-				-a "Minh Nguyen" \
-				-v $(VERSION) \
-				--ext-autodoc \
-				--ext-viewcode \
-				--makefile \
-				--no-batchfile \
-			 && cd .. \
-			 adduser --system --no-create-home --uid $(USER_ID) --group $(USER) &> /dev/null \
-			 chown -R $(USER):$(USER) docs"
-	@git fetch
-	@git checkout origin/main -- docs/
+	@cd pyproject_microservices/api_gateway && make docs-init
+# 	@rm -rf docs/*
+# 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml  up -d
+# 	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(PROJECT) $(PROJECT)_python \
+# 		/bin/bash -c \
+# 			"cd /usr/src/$(PROJECT)/docs \
+# 			 && sphinx-quickstart -q \
+# 				-p $(PROJECT) \
+# 				-a "Minh Nguyen" \
+# 				-v $(VERSION) \
+# 				--ext-autodoc \
+# 				--ext-viewcode \
+# 				--makefile \
+# 				--no-batchfile \
+# 			 && cd .. \
+# 			 adduser --system --no-create-home --uid $(USER_ID) --group $(USER) &> /dev/null \
+# 			 chown -R $(USER):$(USER) docs"
+# 	@git fetch
+# 	@git checkout origin/main -- docs/
 
 docs-view: docker-up
-	@${BROWSER} http://localhost:$(PORT_NGINX) &
+	@cd pyproject_microservices/api_gateway && make docs-init
+# 	@${BROWSER} http://localhost:$(PORT_NGINX) &
 
 format-style: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
@@ -146,7 +150,7 @@ format-style: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
 	yapf -i -p -r --style "pep8" /usr/src/model_serving
 
-getting-started: secret-templates
+getting-started: secret-templates docker-up
     # TODO: add docs-init target back
 	@mkdir -p cache \
 	    && mkdir -p data \

@@ -84,10 +84,10 @@ pyproject_microservices/*/.yapfignore
 *data/*
 
 # Sphinx files
-*docs/_build/
-*docs/_static/
-*docs/_templates/
-*docs/Makefile
+*/docs/_build/
+*/docs/_static/
+*/docs/_templates/
+*/docs/Makefile
 
 # Submodules
 *submodules/*

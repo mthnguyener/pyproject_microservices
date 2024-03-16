@@ -26,7 +26,7 @@ class ComposeService(Enum):
     POSTGRES = f'{PROJECT_NAME}_postgres'
     PGADMIN = f'{PROJECT_NAME}_pgadmin'
     PYTHON = f'{PROJECT_NAME}_python'
-    STREAMLIT = f'{PROJECT_NAME}_streamlit'
+    FRONTEND = f'{PROJECT_NAME}_front_end'
 
 
 class ComposeConfiguration:
@@ -47,7 +47,7 @@ class ComposeConfiguration:
                      self._config)
 
         self._container_prefix = (
-            self._config['services'][f'{PROJECT_NAME}_python']['container_name'].rsplit(
+            self._config['services'][f'{PROJECT_NAME}_nginx']['container_name'].rsplit(
                 '_', 1)[0])
         self._package = self._container_prefix.rsplit('}_', 1)[1]
         self._network = f'{self._package}-network'
@@ -247,6 +247,37 @@ class ComposeConfiguration:
             ],
         }
 
+    def _add_pyproject_starter_front_end(self):
+        """Add Front-End service to configuration."""
+        self._config['services'][f'{PROJECT_NAME}_front_end'] = {
+            'build': {
+                'context': '..',
+                'dockerfile': 'docker/front_end.Dockerfile',
+            },
+            'container_name':
+            f'{self._container_prefix}_front_end',
+            'env_file':
+            '.env',
+            'image':
+            f'{self._package}_front_end',
+            'environment': {
+                'PORT_STREAMLIT': '${PORT_STREAMLIT}',
+            },
+            'networks': [self._network],
+            'ports': ['$PORT_STREAMLIT:8501'],
+            'restart':
+            'always',
+            'volumes': [
+                f'../pyproject_microservices/front_end:/usr/src/front_end',
+                f'../pyproject_microservices/utils:/usr/src/front_end/'
+                f'front_end/utils',
+                f'../logs:/usr/src/front_end/logs',
+                f'../usr_vars:/usr/src/front_end/usr_vars',
+                f'../.yapfignore:/usr/src/front_end/.yapfignore',
+                f'./.env:/usr/src/front_end/docker/.env',
+            ],
+        }
+
     def _add_pyproject_starter_postgres(self):
         """Add PostgreSQL service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_postgres'] = {
@@ -311,32 +342,6 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_pyproject_starter_streamlit(self):
-        """Add Streamlit service to configuration."""
-        self._config['services'][f'{PROJECT_NAME}_streamlit'] = {
-            'build': {
-                'context': '..',
-                'dockerfile': 'docker/streamlit.Dockerfile',
-            },
-            'container_name':
-            f'{self._container_prefix}_streamlit',
-            'env_file':
-            '.env',
-            'image':
-            f'{self._package}_streamlit',
-            'environment': {
-                'PORT_STREAMLIT': '${PORT_STREAMLIT}',
-            },
-            'networks': [self._network],
-            'ports': ['$PORT_STREAMLIT:8501'],
-            'restart':
-            'always',
-            'volumes': [
-                f'../applications/streamlit:'
-                f'/usr/src/pyproject_starter/applications/streamlit',
-            ],
-        }
-
     def _update_depends_on(self, service_name: ComposeService):
         """Update the Python service `depends_on` tag."""
         py_tag = self._config['services'][f'{PROJECT_NAME}_python']
@@ -398,7 +403,7 @@ class ComposeConfiguration:
 
 if __name__ == '__main__':
     config = ComposeConfiguration()
-    services = (ComposeService.STREAMLIT, )
+    services = (ComposeService.FRONTEND, )
     for s in services:
         config.add_service(s)
     config.add_gpu()

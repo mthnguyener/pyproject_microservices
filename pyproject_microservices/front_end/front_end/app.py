@@ -26,7 +26,7 @@ async def main():
     """
     Main function to display the microservice front_end and handle navigation.
     """
-    st.title("My Microservice Front-End")
+    st.title("pyproject_microservices Front-End")
 
     # Navigation
     page = st.sidebar.selectbox("Menu", ["Home", "Model 1", "Model 2"])

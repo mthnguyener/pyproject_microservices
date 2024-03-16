@@ -7,8 +7,8 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'pyproject_microservices'
-copyright = '2023, Minh Nguyen'
-author = 'Minh Nguyen'
+copyright = '2024, Minh'
+author = 'Minh'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
