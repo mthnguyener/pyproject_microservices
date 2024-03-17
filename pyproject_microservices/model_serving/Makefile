@@ -1,5 +1,5 @@
 PROJECT=pyproject_microservices
-SERVICE=api_gateway
+SERVICE=model_serving
 
 ifeq (,$(wildcard docker/.env))
     $(shell ln -s ../usr_vars docker/.env 2>/dev/null)
@@ -88,3 +88,23 @@ docs-init:
 			 chown -R $(USER):$(USER) docs"
 	@git fetch
 	@git checkout origin/main -- pyproject_microservices/$(SERVICE)/docs/
+
+upgrade-packages:
+ifeq ("${PKG_MANAGER}", "pip")
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
+		/bin/bash -c \
+			"pip3 install -U pip \
+			 && pip3 freeze | \
+				grep -v $(PROJECT) | \
+				cut -d = -f 1 > new_requirements.txt \
+			 && pip3 install -U -r new_requirements.txt \
+			 && pip3 freeze > new_requirements.txt \
+			 && sed -i -e '/^-e/d' new_requirements.txt"
+else ifeq ("${PKG_MANAGER}", "conda")
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
+		/bin/bash -c \
+			"conda update conda \
+			 && conda update --all \
+			 && pip freeze > new_requirements.txt \
+			 && sed -i -e '/^-e/d' new_requirements.txt"
+endif

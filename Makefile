@@ -100,8 +100,7 @@ format-style: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
 	yapf -i -p -r --style "pep8" /usr/src/model_serving
 
-getting-started: secret-templates
-    # TODO: add docs-init target back
+getting-started: secret-templates docs-init
 	@mkdir -p cache \
 	    && mkdir -p data \
 		&& mkdir -p htmlcov \
@@ -246,29 +245,16 @@ test: docker-up format-style
 		sh -c 'py.test model_serving | tee -a logs/tests/model_serving-$(timestamp)_log.txt'
 
 test-coverage: test
-	@${BROWSER} htmlcov/index.html &
+	@${BROWSER} pyproject_microservices/api_gateway/htmlcov/index.html &
+	@${BROWSER} pyproject_microservices/front_end/htmlcov/index.html &
+	@${BROWSER} pyproject_microservices/model_serving/htmlcov/index.html &
 
 update-nvidia-base-images: docker-up
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
 		./scripts/update_nvidia_tags.py \
 
 upgrade-packages: docker-up
-ifeq ("${PKG_MANAGER}", "pip")
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"pip3 install -U pip \
-			 && pip3 freeze | \
-				grep -v $(PROJECT) | \
-				cut -d = -f 1 > requirements.txt \
-			 && pip3 install -U -r requirements.txt \
-			 && pip3 freeze > requirements.txt \
-			 && sed -i -e '/^-e/d' requirements.txt"
-else ifeq ("${PKG_MANAGER}", "conda")
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"conda update conda \
-			 && conda update --all \
-			 && pip freeze > requirements.txt \
-			 && sed -i -e '/^-e/d' requirements.txt"
-endif
+	@cd pyproject_microservices/api_gateway && make upgrade-packages
+	@cd pyproject_microservices/front_end && make upgrade-packages
+	@cd pyproject_microservices/model_serving && make upgrade-packages
 
