@@ -18,35 +18,12 @@ endif
 CONTAINER_PREFIX:=$(USER_NAME)_$(PROJECT)
 DOCKER_CMD=docker
 DOCKER_COMPOSE_CMD=docker compose
-# DOCKER_IMAGE=$(shell head -n 1 docker/python.Dockerfile | cut -d ' ' -f 2)
 PKG_MANAGER=pip
-PROFILE_PY:=""
-PROFILE_PROF:=$(notdir $(PROFILE_PY:.py=.prof))
-PROFILE_PATH:=profiles/$(PROFILE_PROF)
-SRC_DIR=/usr/src/$(PROJECT)
 TENSORBOARD_DIR:="ai_logs"
-TEX_WORKING_DIR=${SRC_DIR}/${TEX_DIR}
 USER:=$(shell echo $${USER%%@*})
 USER_ID:=$(shell id -u $(USER))
-# VERSION=$(shell echo $(shell cat $(PROJECT)/__init__.py | grep "^__version__" | cut -d = -f 2))
 
-.PHONY: docs format-style upgrade-packages
-
-cpp-build:
-	@rm -rf build \
-		&& mkdir -p build lib \
-		&& cd build \
-		&& cmake .. \
-		&& cmake --build . \
-		&& cp lib/*.so* ../lib
-
-deploy: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python pip3 wheel --wheel-dir=wheels .[all]
-	@git tag -a v$(VERSION) -m "Version $(VERSION)"
-	@echo
-	@echo
-	@echo Enter the following to push this tag to the repository:
-	@echo git push origin v$(VERSION)
+.PHONY: docs format-style prompt-service upgrade-packages
 
 docker-down:
 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml down
@@ -60,11 +37,11 @@ docker-rebuild: setup.py
 docker-up:
 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml up -d
 
-docker-update-config: docker-up docker-update-compose-file docker-rebuild
-	@echo "Docker environment updated successfully"
-
-docker-update-compose-file:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python scripts/docker_config.py
+# docker-update-config: docker-up docker-update-compose-file docker-rebuild
+# 	@echo "Docker environment updated successfully"
+#
+# docker-update-compose-file:
+# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python scripts/docker_config.py
 
 docs: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
@@ -73,7 +50,7 @@ docs: docker-up
 		/bin/bash -c "cd docs && sphinx-build -b html . _build"
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
 		/bin/bash -c "cd docs && sphinx-build -b html . _build"
-	make docs-view
+	@$(BROWSER) http://localhost:$(PORT_NGINX) 2>&1 &
 
 docs-first-run-delete: docker-up
 	@cd pyproject_microservices/api_gateway && make docs-first-run-delete
@@ -85,108 +62,65 @@ docs-init:
 	@cd pyproject_microservices/front_end && make docs-init
 	@cd pyproject_microservices/model_serving && make docs-init
 
-docs-view: docker-up
-	@read -p "Which documentation to view: " DOC; \
-	echo "To view the documentation, open the following URL in your web browser:"; \
-	echo "You might need to manually type in the url due to http protocol:"; \
-	echo "http://localhost:$(PORT_NGINX)/$$DOC"; \
-    $(BROWSER) localhost:$(PORT_NGINX)/$$DOC &
+docs-view: docker-up http-message
+	@${BROWSER} http://localhost:$(PORT_NGINX)
 
 format-style: docker-up
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
-	yapf -i -p -r --style "pep8" /usr/src/api_gateway
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_front_end \
-	yapf -i -p -r --style "pep8" /usr/src/front_end
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
-	yapf -i -p -r --style "pep8" /usr/src/model_serving
+	@cd pyproject_microservices/api_gateway && make format-style
+	@cd pyproject_microservices/front_end && make format-style
+	@cd pyproject_microservices/model_serving && make format-style
 
 getting-started: secret-templates docs-init
 	@mkdir -p cache \
 	    && mkdir -p data \
-		&& mkdir -p htmlcov \
 		%% mkdir -p logs/apps \
 		%% mkdir -p logs/tests \
 		&& mkdir -p notebooks \
 		&& mkdir -p profiles \
-		&& mkdir -p wheels \
-		&& printf "Project started successfully%s\n"
+		&& printf "Project started successfully!%s\n" \
+		&& printf "Available microservices:%s\n" \
+		&& printf "API Gateway: Handles requests and routes them to the desired services%s\n" \
+		&& printf "Front-End: Serves as a user interface%s\n" \
+		&& printf "Model Serving: Post-process outputs before serving them to the front-end via API gateway%s\n"
 
-ipython: docker-up
-	$(DOCKER_CMD) container exec -it $(CONTAINER_PREFIX)_python ipython
-
-latexmk: docker-up
-	$(DOCKER_CMD) container exec -w $(TEX_WORKING_DIR) $(CONTAINER_PREFIX)_latex \
-		/bin/bash -c "latexmk -f -pdf $(TEX_FILE) && latexmk -c"
-
-new-network:
-	@read -p "Enter the new network name: " NEW_NETWORK; \
-	NEW_NETWORK=$${NEW_NETWORK:-$(PROJECT)-network}; \
-	./scripts/update_network_name.sh $$NEW_NETWORK
+http-message:
+	@echo "URL to documentation: http://localhost:$(PORT_NGINX)"
+	@echo "Most browsers will convert HTTP to HTTPS."
+	@echo "In order to access subpages, you will need to manually enter in the url."
+	@echo "For example, type http://localhost:$(PORT_NGINX)/api_gateway in your address bar."
 
 new-project:
 	@read -p "Enter the new project name: " NEW_PROJECT; \
 	./scripts/create_new_project.sh $(PROJECT) $$NEW_PROJECT
 
-notebook: docker-up notebook-server
-	@printf "%s\n" \
-		"" \
-		"" \
-		"" \
-		"####################################################################" \
-		"Use this link on the host to access the Jupyter server." \
-		""
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"jupyter lab list 2>&1 \
-			 | grep -o 'http.*$(PORT_JUPYTER)\S*' \
-			 | sed -e 's/\(http:\/\/\).*\(:\)/\1localhost:/' && \
-			echo "" && \
-	        jupyter lab list 2>&1 \
-			 | grep -o 'http.*$(PORT_JUPYTER)\S*' \
-			 | sed -e 's/\(http:\/\/\).*\(:\)[0-9]*\/?//'"
-	@printf "%s\n" \
-		"" \
-		"####################################################################"
+notebook: prompt-service
+	@read SERVICE; \
+    ./scripts/update_ports.sh $$SERVICE && \
+    make docker-up && \
+    cd pyproject_microservices/$$SERVICE && make notebook
 
-notebook-delete-checkpoints: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+notebook-delete-checkpoints: docker-up prompt-service
+	@read SERVICE; \
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$$SERVICE \
 		rm -rf `find -L -type d -name .ipynb_checkpoints`
 
-notebook-server: notebook-stop-server
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"jupyter lab \
-				--allow-root \
-				--no-browser \
-				--ServerApp.ip=0.0.0.0 \
-				--ServerApp.port=$(PORT_JUPYTER) \
-				&"
-
-notebook-stop-server:
-	@-$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c "jupyter lab stop $(PORT_JUPYTER)"
-
 package-dependencies: docker-up
-	@printf "%s\n" \
-		"# ${PROJECT} Version: $(VERSION)" \
-# 		"# From NVIDIA NGC CONTAINER: $(DOCKER_IMAGE)" \
-		"#" \
-		> requirements.txt
-ifeq ("${PKG_MANAGER}", "conda")
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"conda list --export >> requirements.txt \
-			 && sed -i -e '/^$(PROJECT)/ s/./# &/' requirements.txt"
-else ifeq ("${PKG_MANAGER}", "pip")
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"pip freeze -l --exclude $(PROJECT) >> requirements.txt"
-endif
+	@cd pyproject_microservices/api_gateway && make package-dependencies
+	@cd pyproject_microservices/front_end && make package-dependencies
+	@cd pyproject_microservices/model_serving && make package-dependencies
 
-profile: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+profile: docker-up prompt-service
+	@read SERVICE; \
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$$SERVICE \
 		/bin/bash -c \
 			"python -m cProfile -o $(PROFILE_PATH) $(PROFILE_PY)"
+
+prompt-service:
+	@echo "AVAILABLE SERVICES: \n \
+	- api_gateway \n \
+	- front_end \n \
+	- model_serving\n\
+	Enter service name:"
 
 secret-templates:
 	@mkdir -p docker/secrets \
@@ -199,50 +133,46 @@ secret-templates:
 		&& printf '%s' "$(PROJECT)" > 'package.txt' \
 		&& printf '%s' "model_serving" > 'model_serving.txt'
 
-snakeviz: docker-up profile snakeviz-server
-	@sleep 0.5
-	@${BROWSER} http://0.0.0.0:$(PORT_PROFILE)/snakeviz/ &
+# snakeviz: docker-up profile snakeviz-server
+# 	@sleep 0.5
+# 	@${BROWSER} http://0.0.0.0:$(PORT_PROFILE)/snakeviz/ &
+#
+# snakeviz-server: docker-up
+# 	@$(DOCKER_CMD) container exec \
+# 		-w /usr/src/$(PROJECT)/profiles \
+# 		$(CONTAINER_PREFIX)_python \
+# 		/bin/bash -c \
+# 			"snakeviz $(PROFILE_PROF) \
+# 				--hostname 0.0.0.0 \
+# 				--port $(PORT_PROFILE) \
+# 				--server &"
+#
+# tensorboard: docker-up tensorboard-server
+# 		&& printf "%s\n" \
+# 			"" \
+# 			"" \
+# 			"" \
+# 			"####################################################################" \
+# 			"Use this link on the host to access the TensorBoard." \
+# 			"" \
+# 			"http://localhost:$(PORT_GOOGLE)" \
+# 			"" \
+# 			"####################################################################"
+#
+# tensorboard-server: docker-up
+# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+# 		/bin/bash -c \
+# 			"tensorboard --load_fast=false --logdir $(TENSORBOARD_DIR) &"
+#
+# tensorboard-stop-server: docker-up
+# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
+# 		/bin/bash -c \
+# 			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
 
-snakeviz-server: docker-up
-	@$(DOCKER_CMD) container exec \
-		-w /usr/src/$(PROJECT)/profiles \
-		$(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"snakeviz $(PROFILE_PROF) \
-				--hostname 0.0.0.0 \
-				--port $(PORT_PROFILE) \
-				--server &"
-
-tensorboard: docker-up tensorboard-server
-		&& printf "%s\n" \
-			"" \
-			"" \
-			"" \
-			"####################################################################" \
-			"Use this link on the host to access the TensorBoard." \
-			"" \
-			"http://localhost:$(PORT_GOOGLE)" \
-			"" \
-			"####################################################################"
-
-tensorboard-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"tensorboard --load_fast=false --logdir $(TENSORBOARD_DIR) &"
-
-tensorboard-stop-server: docker-up
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		/bin/bash -c \
-			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
-
-test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
 test: docker-up format-style
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_api_gateway \
-		sh -c 'py.test api_gateway | tee -a logs/tests/api_gateway-$(timestamp)_log.txt'
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_front_end \
-		sh -c 'py.test front_end | tee -a logs/tests/front_end-$(timestamp)_log.txt'
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_model_serving \
-		sh -c 'py.test model_serving | tee -a logs/tests/model_serving-$(timestamp)_log.txt'
+	@cd pyproject_microservices/api_gateway && make test
+	@cd pyproject_microservices/front_end && make test
+	@cd pyproject_microservices/model_serving && make test
 
 test-coverage: test
 	@${BROWSER} pyproject_microservices/api_gateway/htmlcov/index.html &
@@ -257,4 +187,3 @@ upgrade-packages: docker-up
 	@cd pyproject_microservices/api_gateway && make upgrade-packages
 	@cd pyproject_microservices/front_end && make upgrade-packages
 	@cd pyproject_microservices/model_serving && make upgrade-packages
-

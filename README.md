@@ -15,7 +15,7 @@ https://github.com/mthnguyener/pyproject_starter
 - `docs`: Folder used by sphinx for auto-documentation
 - `logs`: Where we logs everything
   - apps: Log app level items
-  - tests: Log test
+  - tests: Log of test runs
 - `pyproject_microservices`: Contains services and utility directories
   - `api_gateway (COMPLETED)`: API Gateway service for managing and routing requests
   - `data_management`: Data Management service for data related tasks (ETL)
