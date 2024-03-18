@@ -67,7 +67,8 @@ pyproject_microservices/*/.yapfignore
 # Profile files
 *.coverage
 *htmlcov/
-*.profile
+*profiles
+*app.prof
 
 # Project files
 *wheels

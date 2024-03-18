@@ -58,9 +58,9 @@ docs-first-run-delete: docker-up
 	@cd pyproject_microservices/model_serving && make docs-first-run-delete
 
 docs-init:
-	@cd pyproject_microservices/api_gateway && make docs-init
-	@cd pyproject_microservices/front_end && make docs-init
-	@cd pyproject_microservices/model_serving && make docs-init
+	@-cd pyproject_microservices/api_gateway && make docs-init
+	@-cd pyproject_microservices/front_end && make docs-init
+	@-cd pyproject_microservices/model_serving && make docs-init
 
 docs-view: docker-up http-message
 	@${BROWSER} http://localhost:$(PORT_NGINX)
@@ -72,11 +72,8 @@ format-style: docker-up
 
 getting-started: secret-templates docs-init
 	@mkdir -p cache \
-	    && mkdir -p data \
 		%% mkdir -p logs/apps \
 		%% mkdir -p logs/tests \
-		&& mkdir -p notebooks \
-		&& mkdir -p profiles \
 		&& printf "Project started successfully!%s\n" \
 		&& printf "Available microservices:%s\n" \
 		&& printf "API Gateway: Handles requests and routes them to the desired services%s\n" \
@@ -95,7 +92,7 @@ new-project:
 
 notebook: prompt-service
 	@read SERVICE; \
-    ./scripts/update_ports.sh $$SERVICE && \
+    ./scripts/update_ports.sh $$SERVICE JUPYTER && \
     make docker-up && \
     cd pyproject_microservices/$$SERVICE && make notebook
 
@@ -109,11 +106,16 @@ package-dependencies: docker-up
 	@cd pyproject_microservices/front_end && make package-dependencies
 	@cd pyproject_microservices/model_serving && make package-dependencies
 
-profile: docker-up prompt-service
-	@read SERVICE; \
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$$SERVICE \
-		/bin/bash -c \
-			"python -m cProfile -o $(PROFILE_PATH) $(PROFILE_PY)"
+profile: profile-directory docker-up
+	@cd pyproject_microservices/api_gateway && make profile
+	@cd pyproject_microservices/front_end && make profile
+	@cd pyproject_microservices/model_serving && make profile
+
+profile-directory:
+	@mkdir -p cache \
+		&& mkdir -p pyproject_microservices/api_gateway/profiles \
+		&& mkdir -p pyproject_microservices/front_end/profiles \
+		&& mkdir -p pyproject_microservices/model_serving/profiles \
 
 prompt-service:
 	@echo "AVAILABLE SERVICES: \n \
@@ -133,41 +135,40 @@ secret-templates:
 		&& printf '%s' "$(PROJECT)" > 'package.txt' \
 		&& printf '%s' "model_serving" > 'model_serving.txt'
 
-# snakeviz: docker-up profile snakeviz-server
-# 	@sleep 0.5
-# 	@${BROWSER} http://0.0.0.0:$(PORT_PROFILE)/snakeviz/ &
-#
-# snakeviz-server: docker-up
-# 	@$(DOCKER_CMD) container exec \
-# 		-w /usr/src/$(PROJECT)/profiles \
-# 		$(CONTAINER_PREFIX)_python \
-# 		/bin/bash -c \
-# 			"snakeviz $(PROFILE_PROF) \
-# 				--hostname 0.0.0.0 \
-# 				--port $(PORT_PROFILE) \
-# 				--server &"
-#
-# tensorboard: docker-up tensorboard-server
-# 		&& printf "%s\n" \
-# 			"" \
-# 			"" \
-# 			"" \
-# 			"####################################################################" \
-# 			"Use this link on the host to access the TensorBoard." \
-# 			"" \
-# 			"http://localhost:$(PORT_GOOGLE)" \
-# 			"" \
-# 			"####################################################################"
-#
-# tensorboard-server: docker-up
-# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-# 		/bin/bash -c \
-# 			"tensorboard --load_fast=false --logdir $(TENSORBOARD_DIR) &"
-#
-# tensorboard-stop-server: docker-up
-# 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-# 		/bin/bash -c \
-# 			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
+snakeviz: docker-up profile prompt-service
+	@read SERVICE; \
+    ./scripts/update_ports.sh $$SERVICE PROFILE && \
+    make docker-up && \
+	cd pyproject_microservices/$$SERVICE && make snakeviz-server
+	@sleep 0.5
+	@${BROWSER} http://0.0.0.0:$(PORT_PROFILE)/snakeviz/ &
+
+tensorboard: docker-up tensorboard-server
+		@printf "%s\n" \
+			"" \
+			"" \
+			"" \
+			"####################################################################" \
+			"Use this link on the host to access the TensorBoard." \
+			"" \
+			"http://localhost:$(PORT_GOOGLE)" \
+			"" \
+			"####################################################################"
+	@${BROWSER} http://localhost:$(PORT_GOOGLE)
+
+tensorboard-server: docker-up prompt-service
+	@read SERVICE; \
+    ./scripts/update_ports.sh $$SERVICE TENSORBOARD && \
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$$SERVICE \
+		/bin/bash -c \
+			"tensorboard --load_fast=false --logdir=$(TENSORBOARD_DIR) \
+			--port=${PORT_GOOGLE} &"
+
+tensorboard-stop-server: docker-up prompt-service
+	@read SERVICE; \
+	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$$SERVICE \
+		/bin/bash -c \
+			"ps -e | grep tensorboard | tr -s ' ' | cut -d ' ' -f 2 | xargs kill"
 
 test: docker-up format-style
 	@cd pyproject_microservices/api_gateway && make test

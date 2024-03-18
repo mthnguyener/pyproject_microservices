@@ -23,7 +23,7 @@ DOCKER_CMD=docker
 DOCKER_COMPOSE_CMD=docker compose
 DOCKER_IMAGE=$(shell head -n 1 ../../docker/$(SERVICE).Dockerfile | cut -d ' ' -f 2)
 PKG_MANAGER=pip
-PROFILE_PY:=""
+PROFILE_PY:=$(SERVICE)/app.py
 PROFILE_PROF:=$(notdir $(PROFILE_PY:.py=.prof))
 PROFILE_PATH:=profiles/$(PROFILE_PROF)
 SRC_DIR=/usr/src/$(SERVICE)
@@ -156,9 +156,19 @@ else ifeq ("${PKG_MANAGER}", "pip")
 endif
 
 profile:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
+	@-$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
 		/bin/bash -c \
 			"python -m cProfile -o $(PROFILE_PATH) $(PROFILE_PY)"
+
+snakeviz-server:
+	@$(DOCKER_CMD) container exec \
+		-w /usr/src/$(SERVICE)/profiles \
+		$(CONTAINER_PREFIX)_$(SERVICE) \
+		/bin/bash -c \
+			"snakeviz $(PROFILE_PROF) \
+				--hostname 0.0.0.0 \
+				--port $(PORT_PROFILE) \
+				--server &"
 
 test: timestamp := $(shell date +"%Y%m%d_%H%M%S")
 test:
