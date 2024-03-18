@@ -62,7 +62,7 @@ with open(here / 'README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='API Gateway',
+    name='api_gateway',
     version=version,
     description='API Gateway Microservice',
     author='Minh Nguyen',

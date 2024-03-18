@@ -72,8 +72,8 @@ format-style: docker-up
 
 getting-started: secret-templates docs-init
 	@mkdir -p cache \
-		%% mkdir -p logs/apps \
-		%% mkdir -p logs/tests \
+		&& mkdir -p logs/apps \
+		&& mkdir -p logs/tests \
 		&& printf "Project started successfully!%s\n" \
 		&& printf "Available microservices:%s\n" \
 		&& printf "API Gateway: Handles requests and routes them to the desired services%s\n" \
@@ -179,10 +179,6 @@ test-coverage: test
 	@${BROWSER} pyproject_microservices/api_gateway/htmlcov/index.html &
 	@${BROWSER} pyproject_microservices/front_end/htmlcov/index.html &
 	@${BROWSER} pyproject_microservices/model_serving/htmlcov/index.html &
-
-update-nvidia-base-images: docker-up
-	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_python \
-		./scripts/update_nvidia_tags.py \
 
 upgrade-packages: docker-up
 	@cd pyproject_microservices/api_gateway && make upgrade-packages

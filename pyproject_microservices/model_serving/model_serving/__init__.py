@@ -1,11 +1,11 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from pkg_resources import get_distribution, DistributionNotFound
 from os import path
+from pkg_resources import get_distribution, DistributionNotFound
 import sys
 
-from . import pkg_globals
+from model_serving.pkg_globals import PACKAGE_ROOT
 
 __version__ = '0.1.0'
 
@@ -20,4 +20,4 @@ except DistributionNotFound:
 else:
     __version__ = _dist.version
 
-sys.path.append(str(pkg_globals.PACKAGE_ROOT / 'model_serving/utils'))
+sys.path.append(str(PACKAGE_ROOT / 'model_serving/utils'))
