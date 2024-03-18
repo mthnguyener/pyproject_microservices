@@ -15,4 +15,5 @@ RUN pip install --upgrade pip \
 ENV PYTHONPATH=/usr/src/front_end/front_end
 ENV PYTHONPATH=/usr/src/front_end/front_end/utils
 
-CMD ["streamlit", "run", "front_end/app.py"]
+CMD streamlit run --server.port $PORT_FRONTEND front_end/app.py
+

@@ -24,6 +24,7 @@
 */docker/
 
 # Environments
+*new_requirements.txt
 *venv/*
 
 # Formatting
@@ -66,7 +67,8 @@ pyproject_microservices/*/.yapfignore
 # Profile files
 *.coverage
 *htmlcov/
-*.profile
+*profiles
+*app.prof
 
 # Project files
 *wheels

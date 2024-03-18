@@ -8,17 +8,21 @@ secrets:
     file: secrets/model_serving.txt
 services:
   pyproject_microservices-nginx:
+    build:
+      context: ..
+      dockerfile: docker/nginx.Dockerfile
     container_name: ${USER_NAME:-default}_${PROJECT_NAME}_nginx
     env_file: .env
     environment:
     - PORT_NGINX=${PORT_NGINX}
-    image: nginx:alpine
+    image: ${PROJECT_NAME}_nginx
     networks:
     - ${NETWORK_NAME}
     ports:
     - ${PORT_NGINX}:80
     restart: always
     volumes:
+    - ../pyproject_microservices/nginx/default_html/index.html:/usr/share/nginx/html/index.html:rw
     - ../pyproject_microservices/api_gateway/docs/_build:/usr/share/nginx/html/api_gateway:ro
     - ../pyproject_microservices/front_end/docs/_build:/usr/share/nginx/html/front_end:ro
     - ../pyproject_microservices/model_serving/docs/_build:/usr/share/nginx/html/model_serving:ro
@@ -31,7 +35,10 @@ services:
     environment:
     - PORT_APIGATEWAY=${PORT_APIGATEWAY}
     - PORT_FRONTEND=${PORT_FRONTEND}
+    - PORT_GOOGLE=${PORT_GOOGLE}
+    - PORT_JUPYTER=${PORT_JUPYTER}
     - PORT_MODELSERVING=${PORT_MODELSERVING}
+    - PORT_PROFILE=${PORT_PROFILE}
     image: ${PROJECT_NAME}_api_gateway
     networks:
     - ${NETWORK_NAME}
@@ -53,12 +60,15 @@ services:
     environment:
     - PORT_APIGATEWAY=${PORT_APIGATEWAY}
     - PORT_FRONTEND=${PORT_FRONTEND}
+    - PORT_GOOGLE=${PORT_GOOGLE}
+    - PORT_JUPYTER=${PORT_JUPYTER}
     - PORT_MODELSERVING=${PORT_MODELSERVING}
+    - PORT_PROFILE=${PORT_PROFILE}
     image: ${PROJECT_NAME}_front_end
     networks:
     - ${NETWORK_NAME}
     ports:
-    - ${PORT_FRONTEND}:8501
+    - ${PORT_FRONTEND}:${PORT_FRONTEND}
     restart: always
     volumes:
     - ../pyproject_microservices/front_end:/usr/src/front_end
@@ -85,6 +95,7 @@ services:
     environment:
     - PORT_APIGATEWAY=${PORT_APIGATEWAY}
     - PORT_FRONTEND=${PORT_FRONTEND}
+    - PORT_GOOGLE=${PORT_GOOGLE}
     - PORT_JUPYTER=${PORT_JUPYTER}
     - PORT_MODELSERVING=${PORT_MODELSERVING}
     - PORT_PROFILE=${PORT_PROFILE}
@@ -93,9 +104,7 @@ services:
     networks:
     - ${NETWORK_NAME}
     ports:
-    - ${PORT_JUPYTER}:${PORT_JUPYTER}
     - ${PORT_MODELSERVING}:${PORT_MODELSERVING}
-    - ${PORT_PROFILE}:${PORT_PROFILE}
     restart: always
     secrets:
     - package

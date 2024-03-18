@@ -13,6 +13,9 @@ https://github.com/mthnguyener/pyproject_starter
   - `docker-compose.yaml`: Yaml file used by Docker Compose to define the services, 
   networks, and volumes for a multi-container application
 - `docs`: Folder used by sphinx for auto-documentation
+- `logs`: Where we logs everything
+  - apps: Log app level items
+  - tests: Log of test runs
 - `pyproject_microservices`: Contains services and utility directories
   - `api_gateway (COMPLETED)`: API Gateway service for managing and routing requests
   - `data_management`: Data Management service for data related tasks (ETL)
@@ -24,6 +27,7 @@ https://github.com/mthnguyener/pyproject_starter
   - `model_training`: Model Training service training machine learning models
   - `monitoring`: Monitoring and Logging service overseeing the health, performance, 
   and operational aspects of the entire microservices architecture
+  - `nginx`: Nginx service
   - `utils`: Folder containing util functions and variables
 - `scripts`: Folder with setup related scripts
 
@@ -153,6 +157,8 @@ make docs-view
 ```
 
 ### Documentation are viewable at the following urls:
+Many browsers often convert HTTP to HTTPS so manually typing in the url is 
+sometimes requried.
 ```bash
 http://localhost:<PORT_NGINX>/api_gateway/
 http://localhost:<PORT_NGINX>/front_end/

@@ -62,7 +62,7 @@ with open(here / 'README.md', encoding='utf-8') as f:
     long_description = f.read()
 
 setup(
-    name='Front-end',
+    name='front_end',
     version=version,
     description='Front-end Microservice',
     author='Minh Nguyen',
