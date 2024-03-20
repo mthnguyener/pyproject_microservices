@@ -2,7 +2,7 @@
 pyproject_microservices is a Python based microservices project template. 
 The template will have sample endpoints and a generic microservices architecture.
 
-This template builds on top of PyProject Starter: 
+This template referenced PyProject Starter: 
 https://github.com/mthnguyener/pyproject_starter
 
 <img src="./assets/microservices_diagram.png" alt="Microservice Diagram" width="768" height="auto"/>
@@ -12,10 +12,11 @@ https://github.com/mthnguyener/pyproject_starter
   - `Dockerfile`: Dockerfiles for building Docker container images
   - `docker-compose.yaml`: Yaml file used by Docker Compose to define the services, 
   networks, and volumes for a multi-container application
-- `docs`: Folder used by sphinx for auto-documentation
+- `docs`: Project documentation. Documentation for services are in `pyproject_microservices/<service>/docs/` 
+of the respective service and are generated using `sphinx`.
 - `logs`: Where we logs everything
-  - apps: Log app level items
-  - tests: Log of test runs
+  - `apps`: Log app level items
+  - `tests`: Log of test runs
 - `pyproject_microservices`: Contains services and utility directories
   - `api_gateway (COMPLETED)`: API Gateway service for managing and routing requests
   - `data_management`: Data Management service for data related tasks (ETL)
@@ -28,10 +29,11 @@ https://github.com/mthnguyener/pyproject_starter
   - `monitoring`: Monitoring and Logging service overseeing the health, performance, 
   and operational aspects of the entire microservices architecture
   - `nginx`: Nginx service
+    - `default_html`: Nginx default html, index.html, is here
   - `utils`: Folder containing util functions and variables
 - `scripts`: Folder with setup related scripts
 
-Notes: future updates will include Endpoints as I continue to update other microservices
+Notes: future updates will include Endpoints for other services as I continue to update other microservices
 
 ## Setting Up New Project
 1. From current project root directory, run:
@@ -62,3 +64,12 @@ Notes: future updates will include Endpoints as I continue to update other micro
 
 ### - [PROFILERS](docs/PROFILERS.md)
 
+## Acknowledgements
+If you find this project helpful in your work and decide to mention or reference 
+it in your own project, I'd appreciate it! You can acknowledge this project by 
+mentioning my username and providing a link back to this repository. Here's an example:
+
+```
+This project was inspired by or built upon pyproject_microservices by mthnguyener, 
+available at https://github.com/mthnguyener/pyproject_microservices.git.
+```
