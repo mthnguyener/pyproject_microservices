@@ -108,7 +108,7 @@ setup(
     package_dir={'front_end': 'front_end'},
     include_package_data=True,
     entry_points={'console_scripts': [
-        'count=pyproject_starter.cli:count',
+        'count=pyproject_microservices.cli:count',
     ]})
 
 if __name__ == '__main__':

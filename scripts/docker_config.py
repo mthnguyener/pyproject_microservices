@@ -11,7 +11,7 @@ from typing import Optional
 
 import yaml
 
-from pyproject_starter.pkg_globals import PACKAGE_ROOT
+from pyproject_microservices.pkg_globals import PACKAGE_ROOT
 
 logger = logging.getLogger('package')
 
@@ -114,7 +114,7 @@ class ComposeConfiguration:
             'name': f'{self._container_prefix}-db'
         }
 
-    def _add_pyproject_starter_latex(self):
+    def _add_pyproject_microservices_latex(self):
         """Add LaTeX service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_latex'] = {
             'container_name': f'{self._container_prefix}_latex',
@@ -129,7 +129,7 @@ class ComposeConfiguration:
             'working_dir': self._working_dir,
         }
 
-    def _add_pyproject_starter_mongo(self):
+    def _add_pyproject_microservices_mongo(self):
         """Add MongoDB service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_mongo'] = {
             'container_name':
@@ -170,7 +170,7 @@ class ComposeConfiguration:
         self._mongo_create_user_js()
         self._mongo_create_user_sh()
 
-    def _mongo_pyproject_starter_create_user_js(self):
+    def _mongo_pyproject_microservices_create_user_js(self):
         """Write JS script to create MongoDB user."""
         text = [
             'const fs = require("fs")',
@@ -223,7 +223,7 @@ class ComposeConfiguration:
         with open(self._mongo_init_dir / 'create_user.sh', 'w') as f:
             f.writelines('\n'.join(text))
 
-    def _add_pyproject_starter_nginx(self):
+    def _add_pyproject_microservices_nginx(self):
         """Add NGINX service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_nginx'] = {
             'container_name':
@@ -247,7 +247,7 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_pyproject_starter_front_end(self):
+    def _add_pyproject_microservices_front_end(self):
         """Add Front-End service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_front_end'] = {
             'build': {
@@ -278,7 +278,7 @@ class ComposeConfiguration:
             ],
         }
 
-    def _add_pyproject_starter_postgres(self):
+    def _add_pyproject_microservices_postgres(self):
         """Add PostgreSQL service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_postgres'] = {
             'container_name':
@@ -312,7 +312,7 @@ class ComposeConfiguration:
         self._update_depends_on(ComposeService.POSTGRES)
         self._add_secrets()
 
-    def _add_pyproject_starter_pgadmin(self):
+    def _add_pyproject_microservices_pgadmin(self):
         """Add PGAdmin service to configuration."""
         self._config['services'][f'{PROJECT_NAME}_pgadmin'] = {
             'container_name':
