@@ -62,7 +62,7 @@ docs-init:
 	@-cd pyproject_microservices/front_end && make docs-init
 	@-cd pyproject_microservices/model_serving && make docs-init
 
-docs-view: docker-up http-message
+docs-view: docker-up
 	@${BROWSER} http://localhost:$(PORT_NGINX)
 
 format-style: docker-up
@@ -79,12 +79,6 @@ getting-started: secret-templates docs-init
 		&& printf "API Gateway: Handles requests and routes them to the desired services%s\n" \
 		&& printf "Front-End: Serves as a user interface%s\n" \
 		&& printf "Model Serving: Post-process outputs before serving them to the front-end via API gateway%s\n"
-
-http-message:
-	@echo "URL to documentation: http://localhost:$(PORT_NGINX)"
-	@echo "Most browsers will convert HTTP to HTTPS."
-	@echo "In order to access subpages, you will need to manually enter in the url."
-	@echo "For example, type http://localhost:$(PORT_NGINX)/api_gateway in your address bar."
 
 new-project:
 	@read -p "Enter the new project name: " NEW_PROJECT; \

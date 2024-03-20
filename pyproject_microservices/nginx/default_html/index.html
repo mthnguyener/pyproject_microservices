@@ -4,16 +4,161 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>pyproject_microservices</title>
+    <style>
+        /* Style for layout */
+        body {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #sidebar {
+            width: 200px;
+            background-color: #f0f0f0;
+            padding: 20px;
+        }
+
+        #content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* Style for navigation links */
+        #sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #sidebar ul li {
+            margin-bottom: 10px;
+        }
+
+        #sidebar ul li a {
+            text-decoration: none;
+            color: #333;
+            cursor: pointer; /* Change cursor to pointer for better UX */
+            display: block; /* Make entire list item clickable */
+            padding: 5px 10px; /* Add padding for better clickability */
+        }
+
+        /* Style for active link */
+        #sidebar ul li a.active {
+            background-color: #ddd;
+        }
+
+        /* Style for content links */
+        #content ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #content ul li {
+            margin-bottom: 10px;
+        }
+
+        #content ul li a {
+            text-decoration: none;
+            color: #333;
+            cursor: pointer;
+        }
+
+        /* Loading indicator style */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to pyproject_microservices Home Page</h1>
-    <h4>Most browsers will convert HTTP to HTTPS.<br>
-    In order to access the subpages, you will need to manually type in the url.<br>
-    For example, http://localhost:$(PORT_NGINX)/api_gateway.</h4>
-    <ul>
-        <li><a href="/api_gateway">API Gateway Documentation</a></li>
-        <li><a href="/front_end">Front End Documentation</a></li>
-        <li><a href="/model_serving">Model Serving Documentation</a></li>
-    </ul>
+    <div id="sidebar">
+        <h3>Navigation</h3>
+        <ul>
+            <li><a href="/" class="active">Home</a></li>
+            <li><a href="/api_gateway/index.html">API Gateway Documentation</a></li>
+            <li><a href="/front_end/index.html">Front End Documentation</a></li>
+            <li><a href="/model_serving/index.html">Model Serving Documentation</a></li>
+        </ul>
+    </div>
+    <div id="content">
+        <!-- Content will be loaded here -->
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loader" class="loader" style="display: none;"></div>
+
+    <script>
+        // Function to load content asynchronously
+        function loadContent(url) {
+            var contentArea = document.getElementById("content");
+            var loader = document.getElementById("loader");
+
+            // Display loading indicator
+            loader.style.display = "block";
+            contentArea.style.display = "none"; // Hide content area
+            contentArea.innerHTML = ""; // Clear content area
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    contentArea.innerHTML = this.responseText;
+                    contentArea.style.display = "block"; // Show content area
+                    loader.style.display = "none"; // Hide loading indicator
+                    // Update browser history
+                    history.pushState(null, null, url);
+                    // Update active link
+                    var links = document.querySelectorAll("#sidebar ul li a");
+                    links.forEach(function(link) {
+                        link.classList.remove("active");
+                        if (link.getAttribute("href") === url) {
+                            link.classList.add("active");
+                        }
+                    });
+                    // Listen for click events on links in the loaded content
+                    var contentLinks = document.querySelectorAll("#content a");
+                    contentLinks.forEach(function(link) {
+                        link.addEventListener("click", function(event) {
+                            event.preventDefault(); // Prevent default link behavior
+                            var sublink = this.getAttribute("href");
+                            loadContent(sublink);
+                        });
+                    });
+                }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+        }
+
+        // Load initial content based on URL
+        window.onload = function() {
+            var path = window.location.pathname;
+            if (path !== "/") {
+                loadContent(path);
+            } else {
+                document.getElementById("content").innerHTML = "<h2>Welcome to pyproject documentation</h2>";
+            }
+        };
+
+        // Listen for click events on links in the sidebar
+        document.getElementById("sidebar").addEventListener("click", function(event) {
+            if (event.target.tagName === "A") {
+                event.preventDefault(); // Prevent default link behavior
+                var url = event.target.getAttribute("href");
+                if (url === "/") {
+                    document.getElementById("content").innerHTML = "<h2>Welcome to pyproject documentation</h2>";
+                } else {
+                    loadContent(url);
+                }
+            }
+        });
+    </script>
 </body>
 </html>
