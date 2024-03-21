@@ -73,7 +73,7 @@ else
 endif
 
 docs-init:
-	@rm -rf pyproject_microservices/$(SERVICE)/docs/*
+	@rm -rf docs/*
 	@$(DOCKER_COMPOSE_CMD) -f ../../docker/docker-compose.yaml  up -d
 	@$(DOCKER_CMD) container run --rm -v `pwd`:/usr/src/$(SERVICE) $(PROJECT)_$(SERVICE) \
 		/bin/bash -c \
@@ -90,7 +90,7 @@ docs-init:
 			 adduser --system --no-create-home --uid $(USER_ID) --group $(USER) &> /dev/null \
 			 chown -R $(USER):$(USER) docs"
 	@git fetch
-	@git checkout origin/main -- pyproject_microservices/$(SERVICE)/docs/
+	@git checkout origin/main -- docs/
 
 notebook: notebook-server
 	@printf "%s\n" \

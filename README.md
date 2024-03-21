@@ -52,17 +52,11 @@ Notes: future updates will include Endpoints for other services as I continue to
    - `git remote add origin https://github.com/<user_or_organization>/<project>.git`
    - `git push -u origin main`
 
-## Getting Started With the New Project
+## [Getting Started](docs/GETTINGSTARTED.md)
 
-### - [GETTING STARTED](docs/GETTINGSTARTED.md)
+## [Documentation](docs/DOCUMENTATION.md)
 
-## Documentation
-
-### - [DOCUMENTATION](docs/DOCUMENTATION.md)
-
-## Profilers
-
-### - [PROFILERS](docs/PROFILERS.md)
+## [Profilers](docs/PROFILERS.md)
 
 ## Acknowledgements
 If you find this project helpful in your work and decide to mention or reference 

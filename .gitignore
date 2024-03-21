@@ -89,7 +89,7 @@ pyproject_microservices/*/.yapfignore
 */docs/_build/
 */docs/_static/
 */docs/_templates/
-*/docs/Makefile
+*/*/docs/Makefile
 
 # Submodules
 *submodules/*

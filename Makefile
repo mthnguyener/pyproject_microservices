@@ -72,6 +72,7 @@ format-style: docker-up
 
 getting-started: secret-templates docs-init
 	@mkdir -p cache \
+	    && mkdir -p logs \
 		&& mkdir -p logs/apps \
 		&& mkdir -p logs/tests \
 		&& printf "Project started successfully!%s\n" \
@@ -138,7 +139,7 @@ snakeviz: docker-up profile prompt-service
 	@${BROWSER} http://0.0.0.0:$(PORT_PROFILE)/snakeviz/ &
 
 tensorboard: docker-up tensorboard-server
-		@printf "%s\n" \
+	@printf "%s\n" \
 			"" \
 			"" \
 			"" \
