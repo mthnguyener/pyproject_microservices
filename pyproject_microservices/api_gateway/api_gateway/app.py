@@ -24,6 +24,7 @@ async def test():
     A simple test function for the api gateway app.
     """
     output = {"API WORKING": "Sample output from api gateway"}
+
     return output
 
 
@@ -40,25 +41,34 @@ async def trigger_action(action: dict) -> dict:
         A dictionary with a message indicating the API response
     """
     try:
+
         # Perform whatever action you need to trigger here
         async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
+
             url = f"{URL_MODELSERVING}/model-action"
+
             response = await client.post(url, json=action)
+
         if response.status_code == 200:
             response_json = response.json()
+
             await custom_logger.log(
                 "INFO", f"API Gateway posted to model server:\n"
                 f"{response.headers}\n"
                 f"{response.text}")
+
             return {"message": f"API Response: {response_json}"}
+
         else:
+
             raise HTTPException(status_code=response.status_code,
                                 detail=response.text)
 
     except httpx.HTTPError as e:
         raise HTTPException(status_code=500, detail=f"HTTP Error: {e}")
+
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise e
 
 
 @api_gateway_app.get("/model-results")
@@ -70,12 +80,15 @@ async def get_model_results() -> dict:
         A dictionary with the model output
     """
     global model_output
+
     if model_output is None:
         raise HTTPException(status_code=404,
                             detail="Model output not available")
+
     await custom_logger.log(
         "INFO", "Successfully retrieved model output from "
         "API Gateway")
+
     return {"Model Output": model_output}
 
 
@@ -88,14 +101,19 @@ async def update_model_results(result: dict) -> dict:
         A dictionary with the updated model output
     """
     global model_output
+
     try:
+
         # Process the model results (e.g., send database, update UI, etc.)
         # For now, just store the result
         model_output = result
+
         await custom_logger.log(
             "INFO", "API Gateway received output from "
             "model server")
+
         return {"message": f"Model Output: {model_output}"}
+
     except Exception as e:
         raise HTTPException(status_code=500,
                             detail=f"Internal Server Error: {str(e)}")

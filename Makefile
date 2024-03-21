@@ -70,7 +70,7 @@ format-style: docker-up
 	@cd pyproject_microservices/front_end && make format-style
 	@cd pyproject_microservices/model_serving && make format-style
 
-getting-started: secret-templates docs-init
+getting-started: secret-templates
 	@mkdir -p cache \
 	    && mkdir -p logs \
 		&& mkdir -p logs/apps \
@@ -80,6 +80,7 @@ getting-started: secret-templates docs-init
 		&& printf "API Gateway: Handles requests and routes them to the desired services%s\n" \
 		&& printf "Front-End: Serves as a user interface%s\n" \
 		&& printf "Model Serving: Post-process outputs before serving them to the front-end via API gateway%s\n"
+	@make docs-init
 
 new-project:
 	@read -p "Enter the new project name: " NEW_PROJECT; \
@@ -107,8 +108,7 @@ profile: profile-directory docker-up
 	@cd pyproject_microservices/model_serving && make profile
 
 profile-directory:
-	@mkdir -p cache \
-		&& mkdir -p pyproject_microservices/api_gateway/profiles \
+	@mkdir -p pyproject_microservices/api_gateway/profiles \
 		&& mkdir -p pyproject_microservices/front_end/profiles \
 		&& mkdir -p pyproject_microservices/model_serving/profiles \
 

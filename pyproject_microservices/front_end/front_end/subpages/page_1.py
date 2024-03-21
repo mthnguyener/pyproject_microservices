@@ -13,9 +13,10 @@ def page_1():
     st.subheader("Model 1")
     st.write("This is content for Model 1.")
 
-    prompt = st.text_input('Prompt', 'What Color is the sky?')
+    prompt = st.text_input('Prompt', '')
 
     if prompt:
         st.write(f"Sending data to model\n"
                  f"data: {prompt}")
-        st.write('Bot: Blue')
+        st.write('Bot: Interesting...but this is just a template. '
+                 'I have no idea what to say.')

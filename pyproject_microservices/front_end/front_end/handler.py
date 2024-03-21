@@ -19,16 +19,21 @@ async def fetch_model_results():
     """
     try:
         url = f"{URL_APIGATEWAY}/model-results"
+
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
+
             response.raise_for_status()
+
             if response.status_code == 200:
                 result = response.json()
+
                 await custom_logger.log(
                     "INFO", f"Successfully fetched results:\n"
                     f"{response.headers}\n"
                     f"{response.text}")
                 st.write("Model Results:", result)
+
             else:
                 await custom_logger.log(
                     "ERROR", f"Status code: "
@@ -37,12 +42,15 @@ async def fetch_model_results():
                 st.error(f"Failed to fetch model results. Status code: "
                          f"{response.status_code}")
                 st.error(response.text)
+
     except httpx.TimeoutException as e:
         await custom_logger.log("ERROR", f"Timeout error: {e}")
         st.error(f"Timeout error: {e}")
+
     except httpx.HTTPStatusError as e:
         await custom_logger.log("ERROR", f"HTTP error: {e}")
         st.error(f"HTTP error: {e}")
+
     except Exception as e:
         await custom_logger.log("ERROR",
                                 f"Error fetching model results: {str(e)}")
@@ -61,16 +69,21 @@ async def trigger_action(action: str = "example") -> dict:
     """
     try:
         retries = 3
+
         for attempt in range(retries):
+
             try:
                 url = f"{URL_APIGATEWAY}/trigger-action"
+
                 async with httpx.AsyncClient() as client:
                     response = await client.post(url,
                                                  json={"action": action},
                                                  timeout=30)
                 response.raise_for_status()
+
                 if response.status_code == 200:
                     response_json = response.json()
+
                     await custom_logger.log(
                         "INFO", f"Successfully triggered action: "
                         f"{action}\n"
@@ -78,7 +91,9 @@ async def trigger_action(action: str = "example") -> dict:
                         f"{response.text}")
                     st.sidebar.write("Action triggered successfully!")
                     st.sidebar.write("Frontend Response:", response_json)
+
                     return {"message": response_json["message"]}
+
                 else:
                     st.sidebar.write("Failed to trigger action. Status Code:",
                                      response.status_code)
@@ -88,17 +103,18 @@ async def trigger_action(action: str = "example") -> dict:
                         f"{action}\n"
                         f"Detail: "
                         f"{response.json()['detail']}")
-                    return {
-                        "error": "Failed to trigger action",
-                        "detail": response.json()["detail"]
-                    }
+                    return {"error": "Failed to trigger action",
+                            "detail": response.json()["detail"]}
+
             except httpx.TimeoutException as e:
                 await custom_logger.log("ERROR", f"Timeout error: {e}")
                 st.sidebar.error(f"Timeout error: {e}")
+
                 if attempt < retries - 1:
                     st.sidebar.info(f"Retrying... Attempt "
                                     f"{attempt + 1}/{retries}")
                     await asyncio.sleep(2**attempt)  # Exponential backoff
+
                 else:
                     await custom_logger.log(
                         "ERROR", f"Maximum retries exceeded: "
@@ -109,10 +125,12 @@ async def trigger_action(action: str = "example") -> dict:
                         "error": "Maximum retries exceeded",
                         "detail": str(e)
                     }
+
             except httpx.HTTPStatusError as e:
                 await custom_logger.log("ERROR", f"HTTP error: {e}")
                 st.sidebar.error(f"HTTP error: {e}")
                 return {"error": "HTTP error", "detail": str(e)}
+
             except Exception as e:
                 await custom_logger.log("ERROR",
                                         f"An unexpected error occurred: {e}")

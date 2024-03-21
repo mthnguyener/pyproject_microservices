@@ -47,6 +47,7 @@ class CustomLogger:
             message: The message to be logged.
         """
         log_message = f"[{self.service_name}] - {message}"
+
         await asyncio.to_thread(getattr(logger, level.lower()), log_message)
 
 
@@ -76,7 +77,9 @@ def launch_app(service_name: str) -> FastAPI:
         logger.info(f"Successfully started {service_name}.\n"
                     f"{app.openapi()}\n"
                     f"{app.docs_url} | {app.redoc_url}")
+
         return app, custom_logger
+
     except Exception as e:
         logger.error(f"Failed to start {service_name}: {e}")
 

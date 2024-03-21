@@ -12,7 +12,7 @@ directory.
 
 #### Profile Script
 ```bash
-make snakeviz PROFILE_PY=script.py
+make snakeviz
 ```
 
 ### Memory Profiler

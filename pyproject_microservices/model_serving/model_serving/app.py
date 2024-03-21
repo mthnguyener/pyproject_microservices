@@ -20,6 +20,7 @@ async def test():
     A simple test function for the model serving app.
     """
     pred = {"MODEL WORKING": "Sample prediction from model serving service"}
+
     return pred
 
 
@@ -36,9 +37,12 @@ async def handle_action(action: dict) -> dict:
         The response from processing the action.
     """
     if action is not None:
+
         try:
             response = await process_action(action)
+
             return response
+
         except Exception as e:
             await custom_logger.log("ERROR", e)
             raise HTTPException(status_code=500,

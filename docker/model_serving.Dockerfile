@@ -1,6 +1,7 @@
-FROM nvcr.io/nvidia/pytorch:23.11-py3
+FROM python:3.10-slim
+#FROM nvcr.io/nvidia/pytorch:23.11-py3
 
-ENV TORCH_HOME=/usr/src/model_serving/cache
+#ENV TORCH_HOME=/usr/src/model_serving/cache
 
 WORKDIR /usr/src/model_serving
 

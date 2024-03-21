@@ -24,21 +24,29 @@ async def process_action(action: dict) -> dict:
     """
     action["action"] = "example2"
     output = action
+
     try:
+
         async with httpx.AsyncClient() as client:
             url = f"{URL_APIGATEWAY}/model-results"
+
             response = await client.post(url, json=output)
+
             if response.status_code == 200:
                 response_json = response.json()
+
                 await custom_logger.log(
                     "INFO", f"Successfully processed data:\n"
                     f"{response.headers}\n"
                     f"{response.text}")
+
             else:
                 response_json = "Failed to send response back to API Gateway"
+
     except httpx.HTTPError as e:
         response_json = f"HTTP Error: {e}"
         await custom_logger.log("ERROR", response_json)
+
     return {"message": f"Model Response: {response_json}"}
 
 

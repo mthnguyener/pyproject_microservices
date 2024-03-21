@@ -61,55 +61,56 @@ here = Path(__file__).absolute().parent
 with open(here / 'README.md', encoding='utf-8') as f:
     long_description = f.read()
 
-setup(
-    name='model_serving',
-    version=version,
-    description='Model Serving Microservice',
-    author='Minh Nguyen',
-    author_email='mthnguyen@outlook.com',
-    license='BSD',
-    classifiers=[
-        'Development Status :: 1 - Planning',
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved',
-        'Natural Language :: English',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.10',
-        'Topic :: Software Development :: Build Tools',
-    ],
-    keywords='model serving',
-    packages=find_packages(exclude=[
-        'data',
-        'docker',
-        'docs',
-        'logs',
-        'notebooks',
-        'wheels',
-        '*tests',
-        'utils',
-    ]),
-    install_requires=[
-        'click',
-        'plotly',
-        'pyyaml',
-        'ujson',
-        'yapf',
-    ],
-    extras_require={
-        'all': combine_dependencies(dependencies.keys()),
-        'build': combine_dependencies(('build', 'test')),
-        'docs': combine_dependencies('docs'),
-        'jupyter': combine_dependencies('jupyter'),
-        'profile': combine_dependencies('profile'),
-        'test': combine_dependencies('test'),
-    },
-    package_dir={'model_serving': 'model_serving'},
-    include_package_data=True,
-    entry_points={'console_scripts': [
-        'count=pyproject_microservices.cli:count',
-    ]})
+setup(name='model_serving',
+      version=version,
+      description='Model Serving Microservice',
+      author='Minh Nguyen',
+      author_email='mthnguyen@outlook.com',
+      license='BSD',
+      classifiers=[
+          'Development Status :: 1 - Planning',
+          'Environment :: Console',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved',
+          'Natural Language :: English',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python :: 3',
+          'Programming Language :: Python :: 3.10',
+          'Topic :: Software Development :: Build Tools',
+      ],
+      keywords='model serving',
+      packages=find_packages(exclude=[
+          'data',
+          'docker',
+          'docs',
+          'logs',
+          'notebooks',
+          'wheels',
+          '*tests',
+          'utils',
+      ]),
+      install_requires=[
+          'click',
+          'plotly',
+          'pyyaml',
+          'ujson',
+          'yapf',
+      ],
+      extras_require={
+          'all': combine_dependencies(dependencies.keys()),
+          'build': combine_dependencies(('build', 'test')),
+          'docs': combine_dependencies('docs'),
+          'jupyter': combine_dependencies('jupyter'),
+          'profile': combine_dependencies('profile'),
+          'test': combine_dependencies('test'),
+      },
+      package_dir={'model_serving': 'model_serving'},
+      include_package_data=True,
+      entry_points={
+          'console_scripts': [
+              'count=pyproject_microservices.cli:count',
+          ]
+      })
 
 if __name__ == '__main__':
     pass
