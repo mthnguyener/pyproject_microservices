@@ -13,7 +13,7 @@ RUN pip install --upgrade pip \
         requirements.txt \
 	&& rm -rf /tmp/* \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& apt clean -y \
+	&& apt clean -y
 
 ENV PYTHONPATH=/usr/src/api_gateway/api_gateway
 ENV PYTHONPATH=/usr/src/api_gateway/api_gateway/utils

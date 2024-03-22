@@ -1,12 +1,16 @@
-# [BACK TO MAIN README](../README.md)
+[<mark style="font-size:20px; background-color: grey">OVERVIEW</mark>](../README.md) |
+[<mark style="font-size:20px; background-color: lightblue">GETTING STARTED</mark>](GETTINGSTARTED.md) |
+[<mark style="font-size:20px; background-color: grey">NEW SERVICES</mark>](NEWSERVICES.md) |
+[<mark style="font-size:20px; background-color: grey">DOCUMENTATION</mark>](DOCUMENTATION.md) |
+[<mark style="font-size:20px; background-color: grey">PROFILERS</mark>](PROFILERS.md)
 
-## Getting Started With the New Project
+# Getting Started With the New Project
  is a fully functioning Python package that may be installed using
 `pip`.
 Docker Images are built into the package and a Makefile provides an easy to call
 repetitive commands.
 
-### Makefile Code Completion
+## Makefile Code Completion
 It's handy to have code completion when calling targets from the Makefile.
 To enable this feature add the following to your user profile file.
 - On Ubuntu this would be your `~/.profile` file.
@@ -15,7 +19,7 @@ To enable this feature add the following to your user profile file.
 complete -W "`grep -oE '^[a-zA-Z0-9_.-]+:([^=]|$)' Makefile | sed 's/[^a-zA-Z0-9_.-]*$//'`" make
 ```
 
-### Clone the Repository
+## Clone the Repository
 First, make a local copy of the project.
 After setting up SSH keys on GitHub call the following command to clone the
 repository.
@@ -26,7 +30,7 @@ A directory called `pyproject_microservices` will be created where the
 command was executed. This `pyproject_microservices` directory will be 
 referred to as the "package root directory" throughout the project.
 
-### Initialize the Project
+## Initialize the Project
 Some functionality of the package is created locally.
 Run the following command from the package root directory to finish setting up
 the project.
@@ -34,7 +38,7 @@ the project.
 make getting-started
 ```
 
-### Jupyter Notebooks
+## Jupyter Notebooks
 While Jupyter notebooks are not ideal for source code, they can be powerful
 when applied to path finding and creating training material.
 The pyproject_microservices project is capable of creating a Jupyter 
@@ -44,42 +48,42 @@ vice versa. For consistency when creating notebooks please store them in the
 `notebooks` directory. Call the following commands from the package root 
 directory to start and stop the Jupyter server.
 
-#### Create a Notebook Server
+### Create a Notebook Server
 ```bash
 make notebook
 ```
 
-#### Shutdown a Notebook Server
+### Shutdown a Notebook Server
 ```bash
 make notebook-stop-server
 ```
 
-### Test Framework
+## Test Framework
 The  is configured to use the pytest test framework in conjunction with
 coverage and the YAPF style linter.
 To run the tests and display a coverage report call the following command from
 the package root directory.
 
-#### Test Coverage
+### Test Coverage
 ```bash
 make test-coverage
 ```
 
 To only run the tests, and not display the coverage, call the following.
 
-### Tests
+## Tests
 ```bash
 make test
 ```
 
-#### Update Style
+### Update Style
 To only run the YAPF style linter call this command from the package root
 directory.
 ```bash
 make format-style
 ```
 
-### Dependencies
+## Dependencies
 Since the pyproject_microservices utilizes NVIDIA optimized Docker 
 images most of the Python dependencies could be installed using PIP or Conda.
 The `requirements.txt` file contains a reference to the specific
@@ -91,4 +95,10 @@ There is a make target to update the requirements file.
 make package-dependencies
 ```
 
-# [BACK TO MAIN README](../README.md)
+<br>
+
+[<mark style="font-size:20px; background-color: grey">OVERVIEW</mark>](../README.md) |
+[<mark style="font-size:20px; background-color: lightblue">GETTING STARTED</mark>](GETTINGSTARTED.md) |
+[<mark style="font-size:20px; background-color: grey">NEW SERVICES</mark>](NEWSERVICES.md) |
+[<mark style="font-size:20px; background-color: grey">DOCUMENTATION</mark>](DOCUMENTATION.md) |
+[<mark style="font-size:20px; background-color: grey">PROFILERS</mark>](PROFILERS.md)

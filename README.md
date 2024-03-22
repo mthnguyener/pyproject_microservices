@@ -1,9 +1,17 @@
-#  pyproject_microservices
+[<mark style="font-size:20px; background-color: lightblue">OVERVIEW</mark>](README.md) |
+[<mark style="font-size:20px; background-color: grey">GETTING STARTED</mark>](docs/GETTINGSTARTED.md) |
+[<mark style="font-size:20px; background-color: grey">NEW SERVICES</mark>](docs/NEWSERVICES.md) |
+[<mark style="font-size:20px; background-color: grey">DOCUMENTATION</mark>](docs/DOCUMENTATION.md) |
+[<mark style="font-size:20px; background-color: grey">PROFILERS</mark>](docs/PROFILERS.md)
+
+#  Overview
 pyproject_microservices is a Python based microservices project template. 
 The template will have sample endpoints and a generic microservices architecture.
 
-This template referenced PyProject Starter: 
-https://github.com/mthnguyener/pyproject_starter
+This template referenced PyProject Microservices: 
+- **https://github.com/mthnguyener/pyproject_microservices**
+<br>
+<br>
 
 <img src="./assets/microservices_diagram.png" alt="Microservice Diagram" width="768" height="auto"/>
 
@@ -52,12 +60,6 @@ Notes: future updates will include Endpoints for other services as I continue to
    - `git remote add origin https://github.com/<user_or_organization>/<project>.git`
    - `git push -u origin main`
 
-## [Getting Started](docs/GETTINGSTARTED.md)
-
-## [Documentation](docs/DOCUMENTATION.md)
-
-## [Profilers](docs/PROFILERS.md)
-
 ## Acknowledgements
 If you find this project helpful in your work and decide to mention or reference 
 it in your own project, I'd appreciate it! You can acknowledge this project by 
@@ -67,3 +69,11 @@ mentioning my username and providing a link back to this repository. Here's an e
 This project was inspired by or built upon pyproject_microservices by mthnguyener, 
 available at https://github.com/mthnguyener/pyproject_microservices.git.
 ```
+
+<br>
+
+[<mark style="font-size:20px; background-color: lightblue">OVERVIEW</mark>](README.md) |
+[<mark style="font-size:20px; background-color: grey">GETTING STARTED</mark>](docs/GETTINGSTARTED.md) |
+[<mark style="font-size:20px; background-color: grey">NEW SERVICES</mark>](docs/NEWSERVICES.md) |
+[<mark style="font-size:20px; background-color: grey">DOCUMENTATION</mark>](docs/DOCUMENTATION.md) |
+[<mark style="font-size:20px; background-color: grey">PROFILERS</mark>](docs/PROFILERS.md)

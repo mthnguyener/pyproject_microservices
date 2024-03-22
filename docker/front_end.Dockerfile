@@ -10,7 +10,7 @@ RUN pip install --upgrade pip \
         requirements.txt \
 	&& rm -rf /tmp/* \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& apt clean -y \
+	&& apt clean -y
 
 ENV PYTHONPATH=/usr/src/front_end/front_end
 ENV PYTHONPATH=/usr/src/front_end/front_end/utils
