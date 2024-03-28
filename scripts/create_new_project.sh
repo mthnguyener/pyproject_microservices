@@ -53,7 +53,7 @@ find "$old_name" \( -path "$old_name/utils" -prune \) -o \( -path "*/utils" -exe
 
 # Update file contents
 mv $old_name $new_name
-find . -type f -exec sed -i "s/$old_name/$new_name/g" {} +
+find . -type f ! -name 'README.md' -exec sed -i "s/$old_name/$new_name/g" {} +
 
 # Removing git directory from template
 rm -rf .git

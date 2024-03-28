@@ -19,7 +19,7 @@ do
 done
 
 # Create usr_vars configuration file
-INITIAL_PORT=$(( (UID - 500) * 50 + 10000 ))
+INITIAL_PORT=$(( (UID - 500) + 10000 ))
 printf "%s\n" \
     "USER_NAME=${USER}" \
     "PROJECT_NAME=pyproject_microservices" \

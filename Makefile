@@ -97,6 +97,10 @@ notebook-delete-checkpoints: docker-up prompt-service
 	$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$$SERVICE \
 		rm -rf `find -L -type d -name .ipynb_checkpoints`
 
+notebook-stop-server: prompt-service
+	@read SERVICE; \
+	cd seenarios/$$SERVICE && make notebook-stop-server
+
 package-dependencies: docker-up
 	@cd pyproject_microservices/api_gateway && make package-dependencies
 	@cd pyproject_microservices/front_end && make package-dependencies

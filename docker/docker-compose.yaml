@@ -22,6 +22,8 @@ services:
     - ${PORT_NGINX}:80
     restart: always
     volumes:
+    - ../pyproject_microservices/nginx/styles.css:/usr/share/nginx/html/styles.css
+    - ../pyproject_microservices/nginx/scripts.js:/usr/share/nginx/html/scripts.js
     - ../pyproject_microservices/nginx/default_html/index.html:/usr/share/nginx/html/index.html:rw
     - ../pyproject_microservices/api_gateway/docs/_build:/usr/share/nginx/html/api_gateway:ro
     - ../pyproject_microservices/front_end/docs/_build:/usr/share/nginx/html/front_end:ro

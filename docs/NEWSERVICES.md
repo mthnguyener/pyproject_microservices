@@ -31,17 +31,17 @@ under the `services` section. I recommend using the other services as guidance.
 Instead of hard-coding the ports, you can add the ports to `scripts/create_usr_vars.sh`. 
 This will update `usr_vars` and `docker/.env` which has a symbolic link with `usr_vars`.
 
-The following directories and files were mounted to the completed/working services:
+The following directories and files are mounted to the completed/working services:
 - `utils`: mounted to `/usr/src/<service>/<service>/utils`
 - `logs`: mounted to `/usr/src/<service>/logs`
 - `usr_vars`: mounted to `/usr/src/<service>/usr_vars`
 - `.yapfignore`: mounted to `/usr/src/<service>/.yapfignore`
 - `.env`: mounted to `/usr/src/<service>/docker/.env`
 
-3. Copy`Makefile`, `README.md`, `requirements.txt`, `setup.cfg`, and `setup.py` over to
-your new microservice.
+3. Copy `Makefile`, `README.md`, `requirements.txt`, `setup.cfg`, and `setup.py`
+from one of the services under the completed microservices list over to your new microservice.
 
-For example, if only `model_training` of the potential microservices is needed, 
+For example, of the list potential microservices, if only `model_training` is needed, 
 delete the folders of unused services and copy the above files over to `<project>/model_training`
 
 4. Update the "main" `Makefile` from project root to include the new service details.
@@ -54,6 +54,8 @@ docs-init:
 	@-cd pyproject_microservices/model_serving && make docs-init
 	@-cd pyproject_microservices/model_training && make docs-init <--- new service
 ```
+
+5. Update the "main" `README.md` from project root with your new project information.
 
 <br>
 
