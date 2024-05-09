@@ -6,7 +6,7 @@
 import httpx
 
 from model_serving.utils.helpers import CustomLogger
-from model_serving.utils.variables import URL_APIGATEWAY
+from model_serving.utils.variables import HTTP_TIMEOUT, URL_APIGATEWAY
 
 custom_logger = CustomLogger(service_name='model_serving')
 
@@ -27,7 +27,7 @@ async def process_action(action: dict) -> dict:
 
     try:
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
             url = f"{URL_APIGATEWAY}/model-results"
 
             response = await client.post(url, json=output)

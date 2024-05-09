@@ -3,6 +3,8 @@
 """ Front-End App Module
 
 """
+import datetime
+
 import asyncio
 import streamlit as st
 
@@ -12,6 +14,8 @@ from front_end.subpages.page_2 import page_2
 from front_end.utils.helpers import CustomLogger
 
 custom_logger = CustomLogger(service_name='front_end')
+
+YEAR = datetime.datetime.now().year
 
 
 def home_page():
@@ -45,6 +49,10 @@ async def main():
         await asyncio.create_task(trigger_action())
 
         await asyncio.create_task(fetch_model_results())
+
+    st.sidebar.write(f"**© {YEAR} [Be Happy]"
+                     f"(https://github.com/mthnguyener/pyproject_microservices)"
+                     f"**")
 
 
 if __name__ == "__main__":

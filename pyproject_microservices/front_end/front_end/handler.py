@@ -8,7 +8,7 @@ import httpx
 import streamlit as st
 
 from front_end.utils.helpers import CustomLogger
-from front_end.utils.variables import URL_APIGATEWAY
+from front_end.utils.variables import HTTP_TIMEOUT, URL_APIGATEWAY
 
 custom_logger = CustomLogger(service_name='front_end')
 
@@ -20,7 +20,7 @@ async def fetch_model_results():
     try:
         url = f"{URL_APIGATEWAY}/model-results"
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
             response = await client.get(url)
 
             response.raise_for_status()
@@ -48,8 +48,8 @@ async def fetch_model_results():
         st.error(f"Timeout error: {e}")
 
     except httpx.HTTPStatusError as e:
-        await custom_logger.log("ERROR", f"HTTP error: {e}")
-        st.error(f"HTTP error: {e}")
+        await custom_logger.log("ERROR", f"HTTP status error: {e}")
+        st.error(f"HTTP status error: {e}")
 
     except Exception as e:
         await custom_logger.log("ERROR",
@@ -75,10 +75,8 @@ async def trigger_action(action: str = "example") -> dict:
             try:
                 url = f"{URL_APIGATEWAY}/trigger-action"
 
-                async with httpx.AsyncClient() as client:
-                    response = await client.post(url,
-                                                 json={"action": action},
-                                                 timeout=30)
+                async with httpx.AsyncClient(timeout=HTTP_TIMEOUT) as client:
+                    response = await client.post(url, json={"action": action})
                 response.raise_for_status()
 
                 if response.status_code == 200:
@@ -127,9 +125,9 @@ async def trigger_action(action: str = "example") -> dict:
                     }
 
             except httpx.HTTPStatusError as e:
-                await custom_logger.log("ERROR", f"HTTP error: {e}")
-                st.sidebar.error(f"HTTP error: {e}")
-                return {"error": "HTTP error", "detail": str(e)}
+                await custom_logger.log("ERROR", f"HTTP status error: {e}")
+                st.sidebar.error(f"HTTP status error: {e}")
+                return {"error": "HTTP status error", "detail": str(e)}
 
             except Exception as e:
                 await custom_logger.log("ERROR",
