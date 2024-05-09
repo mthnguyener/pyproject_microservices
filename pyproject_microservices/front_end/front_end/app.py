@@ -8,6 +8,7 @@ import datetime
 import asyncio
 import streamlit as st
 
+from front_end.style import divider_style
 from front_end.handler import fetch_model_results, trigger_action
 from front_end.subpages.page_1 import page_1
 from front_end.subpages.page_2 import page_2
@@ -31,6 +32,11 @@ async def main():
     Main function to display the microservice front_end and handle navigation.
     """
     st.title("pyproject_microservices Front-End")
+    st.subheader("by [mthnguyen]"
+                 "(https://github.com/mthnguyener/pyproject_microservices)")
+
+    st.markdown(divider_style, unsafe_allow_html=True)
+    st.write("")
 
     # Navigation
     page = st.sidebar.selectbox("Menu", ["Home", "Model 1", "Model 2"])
@@ -50,9 +56,8 @@ async def main():
 
         await asyncio.create_task(fetch_model_results())
 
-    st.sidebar.write(f"**© {YEAR} [Be Happy]"
-                     f"(https://github.com/mthnguyener/pyproject_microservices)"
-                     f"**")
+    st.sidebar.write(f"**© {YEAR} [mthnguyen](https://github.com/mthnguyener/"
+                     f"pyproject_microservices)**")
 
 
 if __name__ == "__main__":
