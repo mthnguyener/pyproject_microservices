@@ -22,8 +22,8 @@ done
 INITIAL_PORT=$(( (UID - 500) + 10000 ))
 printf "%s\n" \
     "USER_NAME=${USER}" \
-    "PROJECT_NAME=pyproject_microservices" \
-    "NETWORK_NAME=pyproject_microservices-network" \
+    "PROJECT_NAME=fai" \
+    "NETWORK_NAME=fai-network" \
     "" \
     "# Data Directory" \
     "DATA_DIR=/mnt/data" \
@@ -40,6 +40,19 @@ printf "%s\n" \
     "PORT_MONITORING=$((INITIAL_PORT + 8))" \
     "PORT_NGINX=$((INITIAL_PORT + 9))" \
     "PORT_PROFILE=$((INITIAL_PORT + 10))" \
+    "" \
+    "# Anthropic" \
+    "ANTHROPIC_API_KEY=" \
+    "" \
+    "# Google" \
+    "GOOGLE_API_KEY=" \
+    "" \
+    "# Groq" \
+    "GROQ_API_KEY=" \
+    "" \
+    "# OpenAI" \
+    "OPENAI_MODEL_NAME=" \
+    "OPENAI_API_KEY=" \
     "" \
     > "usr_vars"
 echo "Successfully created: usr_vars"

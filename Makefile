@@ -103,7 +103,7 @@ notebook-delete-checkpoints: docker-up prompt-service
 
 notebook-stop-server: prompt-service
 	@read SERVICE; \
-	cd seenarios/$$SERVICE && make notebook-stop-server
+	cd pyproject_microservices/$$SERVICE && make notebook-stop-server
 
 package-dependencies: docker-up
 	@cd pyproject_microservices/api_gateway && make package-dependencies
