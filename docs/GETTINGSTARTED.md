@@ -5,7 +5,7 @@
 [<mark style="font-size:20px; background-color: grey">PROFILERS</mark>](PROFILERS.md)
 
 # Getting Started With the New Project
- is a fully functioning Python package that may be installed using
+Each service is a fully functioning Python package that may be installed using
 `pip`.
 Docker Images are built into the package and a Makefile provides an easy to call
 repetitive commands.

@@ -21,7 +21,7 @@ make docs-view
 
 ## Documentation are viewable at the following urls:
 Many browsers often convert HTTP to HTTPS so manually typing in the url is 
-sometimes requried.
+sometimes required.
 ```bash
 http://localhost:<PORT_NGINX>/api_gateway/
 http://localhost:<PORT_NGINX>/front_end/

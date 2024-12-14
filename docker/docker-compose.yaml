@@ -47,6 +47,7 @@ services:
     ports:
     - ${PORT_APIGATEWAY}:${PORT_APIGATEWAY}
     volumes:
+    - ../assets:/usr/src/api_gateway/assets
     - ../pyproject_microservices/api_gateway:/usr/src/api_gateway
     - ../pyproject_microservices/utils:/usr/src/api_gateway/api_gateway/utils
     - ../logs:/usr/src/api_gateway/logs
@@ -73,6 +74,7 @@ services:
     - ${PORT_FRONTEND}:${PORT_FRONTEND}
     restart: always
     volumes:
+    - ../assets:/usr/src/front_end/assets
     - ../pyproject_microservices/front_end:/usr/src/front_end
     - ../pyproject_microservices/utils:/usr/src/front_end/front_end/utils
     - ../logs:/usr/src/front_end/logs
@@ -116,6 +118,7 @@ services:
     ulimits:
       memlock: -1
     volumes:
+    - ../assets:/usr/src/model_serving/assets
     - ../pyproject_microservices/model_serving:/usr/src/model_serving
     - ../pyproject_microservices/utils:/usr/src/model_serving/model_serving/utils
     - ${DATA_DIR}:/usr/src/model_serving/data

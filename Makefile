@@ -38,7 +38,8 @@ docker-rebuild: setup.py
 	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml up -d --build 2>&1 | tee docker/image_build.log
 
 docker-up:
-	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml up -d
+	@$(DOCKER_COMPOSE_CMD) -f docker/docker-compose.yaml up -d && \
+	echo "Application is running on http://localhost:$(PORT_FRONTEND)"
 
 # docker-update-config: docker-up docker-update-compose-file docker-rebuild
 # 	@echo "Docker environment updated successfully"
