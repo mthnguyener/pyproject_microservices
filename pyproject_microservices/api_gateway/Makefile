@@ -41,7 +41,7 @@ docs-first-run-delete:
 				--ext-viewcode \
 				--makefile \
 				--no-batchfile"
-	$(DOCKER_COMPOSE_CMD) -f ../../docker/docker-compose.yaml restart $(PROJECT)-nginxx
+	$(DOCKER_COMPOSE_CMD) -f ../../docker/docker-compose.yaml restart $(PROJECT)-nginx
 ifeq ("$(shell git remote)", "origin")
 	git fetch
 	git checkout origin/main -- docs/
@@ -129,6 +129,7 @@ notebook-server: notebook-stop-server
 				--no-browser \
 				--ServerApp.ip=0.0.0.0 \
 				--ServerApp.port=$(PORT_JUPYTER) \
+				--notebook-dir=/usr/src/$(SERVICE) \
 				&"
 
 notebook-stop-server:

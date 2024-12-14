@@ -92,6 +92,10 @@ docs-init:
 	@git fetch
 	@git checkout origin/main -- docs/
 
+format-style:
+	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
+	yapf -i -p -r --style "pep8" ${SRC_DIR}
+
 notebook: notebook-server
 	@printf "%s\n" \
 		"" \
@@ -113,23 +117,20 @@ notebook: notebook-server
 		"" \
 		"####################################################################"
 
-format-style:
-	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
-	yapf -i -p -r --style "pep8" ${SRC_DIR}
-
 notebook-delete-checkpoints: docker-up
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
 		rm -rf `find -L -type d -name .ipynb_checkpoints`
 
 notebook-server: notebook-stop-server
 	@$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
-		/bin/bash -c \
-			"jupyter lab \
-				--allow-root \
-				--no-browser \
-				--ServerApp.ip=0.0.0.0 \
-				--ServerApp.port=$(PORT_JUPYTER) \
-				&"
+	    /bin/bash -c \
+	        "jupyter lab \
+                --allow-root \
+                --no-browser \
+                --ServerApp.ip=0.0.0.0 \
+                --ServerApp.port=$(PORT_JUPYTER) \
+                --notebook-dir=/usr/src/$(SERVICE) \
+                &"
 
 notebook-stop-server:
 	@-$(DOCKER_CMD) container exec $(CONTAINER_PREFIX)_$(SERVICE) \
